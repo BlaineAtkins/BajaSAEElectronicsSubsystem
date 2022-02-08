@@ -1,7 +1,7 @@
 #include "Vehicle.h"
-//#include <SPI.h>
-//#include <GD2.h> // For display
-#include <time.h>
+#include <SPI.h>
+#include <GD2.h> // For display
+#include <ctime>
 
 Vehicle::Vehicle(){
     this.startTime = time(0);

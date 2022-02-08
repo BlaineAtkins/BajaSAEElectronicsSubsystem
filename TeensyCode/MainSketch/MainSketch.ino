@@ -1,6 +1,6 @@
-//#include <EEPROM.h> // For display
-//#include <SPI.h>
-//#include "Vehicle.cpp"
+#include <EEPROM.h> // For display
+#include <SPI.h>
+#include "Vehicle.cpp"
 
 
 // NOTE: Display uses following pins:
