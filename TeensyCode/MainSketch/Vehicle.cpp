@@ -1,58 +1,112 @@
-#include "Vehicle.h"
+#include <EEPROM.h>
 #include <SPI.h>
-#include <GD2.h> // For display
-#include <ctime>
+#include <GD2.h>
+#include <SD.h>
+#include <time.h>
+#include "Vehicle.h"
 
-Vehicle::Vehicle(){
-    this.startTime = time(0);
-    this.runTime = 0;
+
+// Initialize display
+void Vehicle::BeginDisplay(){
+  GD.begin(0);
+}
+
+
+// Set start time to current time, so runTime == 0
+void Vehicle::ResetTimer(){
+  this->startTime = time(0);
 }
 
 
 
 int Vehicle::GetRunTime(){
-    this.runTime = time(0) - this.startTime;
+    this->runTime = time(0) - this->startTime;
+}
+
+
+// TODO: change to collect, store, and return speed
+int Vehicle::GetSpeedMPH(){
+  return this->speedMPH;
+}
+
+
+
+// TODO: include all data in write pass
+// Write all data to SD card with time stamp
+bool Vehicle::WriteToSD(){
+  SD.begin(254);
+  File dataFile = SD.open("VehicleData.txt", FILE_WRITE);
+  if(dataFile){ // 254==BUILTIN_SDCARD, set 
+    dataFile.print((int)time(0));
+    dataFile.print(",");
+    dataFile.print(this->runTime);
+    dataFile.print(",");
+    dataFile.print(this->fuel);
+    dataFile.print(",");
+    dataFile.print(this->rpm);
+    dataFile.print(",");
+    dataFile.print(this->speedMPH);
+    dataFile.print(",");
+    dataFile.print(this->tempAmb);
+    dataFile.print(",");
+    dataFile.print(this->tempCVT);
+    dataFile.print(",");
+    dataFile.print(this->accelerometer[0]);
+    dataFile.print(",");
+    dataFile.print(this->accelerometer[1]);
+    dataFile.print(",");
+    dataFile.print(this->accelerometer[2]);
+    dataFile.print("\n");
+    dataFile.close();
+    return true;    
+  }
+  dataFile.close();
+  return false;
 }
 
 
 
 // TODO: Get ambient temperature
 int Vehicle::GetTempAmb(){
-  return this.tempAmb;
+  return this->tempAmb;
 }
 
 
 
+// Gets CVT temperature from sensor and returns as int
 // TODO: Get ambient temperature
 int Vehicle::GetTempCVT(){
-  return this.tempCVT;
+  return this->tempCVT;
 }
 
 
 
+// Collects, updates, and returns engine RPM
 // TODO: Get engine rpm
 int Vehicle::GetRPM(){
-  return this.rpm;
+  return this->rpm;
 }
 
 
 
+// Returns fuel level between 0 and 100
 // TODO: Get fuel level (0-100%)
 int Vehicle::GetFuelLevel(){
-  return this.fuel;
+  return this->fuel;
 }
 
 
 
-void Display(){
- 
+// TODO: Include all desired data on display pass
+// Refresh display with new data
+void Vehicle::Display(){
   // Formatting
   GD.ClearColorRGB(0, 0, 40); // Set background color
   GD.Clear();
   GD.ColorRGB(0xffffff); // Set text/element color
 
   // Display engine RPM
-  String rpmString = (String)this.rpm;
+  String rpmString = (String)this->rpm;
   char rpmChar[10];
   rpmString.toCharArray(rpmChar, 10);
   GD.cmd_gauge(GD.w/2, GD.h/2, 100, OPT_NOBACK, 20, 100, rpmChar, 750);
@@ -60,7 +114,7 @@ void Display(){
   GD.cmd_text(GD.w/2, GD.h/2+80, 29, OPT_CENTER, "RPM");
 
   //Display fuel level
-  GD.cmd_progress(GD.w-35, 70, 25, GD.h-90, OPT_CENTER, this.fuel, 100);
+  GD.cmd_progress(GD.w-35, 70, 25, GD.h-90, OPT_CENTER, this->fuel, 100);
   GD.cmd_text(GD.w-23, 30, 31, OPT_CENTER, "F");
 
   GD.swap();

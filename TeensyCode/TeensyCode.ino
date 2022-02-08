@@ -1,3 +1,5 @@
+
+
 //for GPS
 #include <TinyGPS++.h> //DIFFERENT FROM TinyGPS! Forgot if this is from arduino library manager or github
 #include <SoftwareSerial.h> //also forget if this is from arduino library manager or github
@@ -78,7 +80,6 @@ void displayToLCD(){
   if(gpsSpeed==NULL || gps.speed.age()>2000){ //if we didn't get a valid speed or the speed data was collected over 2 seconds ago
     validSpeed=false; //display -- or something instead of speed
   }
-  
 }
 
 void writeToSDCard(){
