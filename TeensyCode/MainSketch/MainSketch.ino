@@ -1,6 +1,7 @@
-#include <EEPROM.h> // For display
-#include <SPI.h>
-#include <GD2.h> // For display
+//#include <EEPROM.h> // For display
+//#include <SPI.h>
+//#include "Vehicle.cpp"
+
 
 // NOTE: Display uses following pins:
 // 6-13 ()
@@ -18,69 +19,13 @@ void setup() {
 }
 
 void loop() {
-  // put your main code here, to run repeatedly:
-  Display();
-  delay(100);
+  Vehicle Baja;
+
+  while(1){
+    Baja.Display();
+    delay(50);
+  }
+  exit(0);
 }
 
-void Display(){
-  // Collect/Retrieve data
-  int tempAmb = GetTempAmb();
-  int tempCVT = GetTempCVT();
-  int rpm = GetRPM();
-  int fuelLevel = GetFuelLevel();
-  
-  // Formatting
-  GD.ClearColorRGB(0, 0, 40); // Set background color
-  GD.Clear();
-  GD.ColorRGB(0xffffff); // Set text/element color
 
-
-  // Display engine RPM
-  String rpmString = (String)rpm;
-  char rpmChar[10];
-  rpmString.toCharArray(rpmChar, 10);
-  GD.cmd_gauge(GD.w/2, GD.h/2, 100, OPT_NOBACK, 20, 100, rpmChar, 750);
-  GD.cmd_text(GD.w/2, GD.h/2+50, 31, OPT_CENTER, rpmChar);
-  GD.cmd_text(GD.w/2, GD.h/2+80, 29, OPT_CENTER, "RPM");
-
-  //Display fuel level
-  GD.cmd_progress(GD.w-35, 70, 25, GD.h-90, OPT_CENTER, fuelLevel, 100);
-  GD.cmd_text(GD.w-23, 30, 31, OPT_CENTER, "F");
-
-
-  GD.swap();
-  
-/* DISPLAY EXAMPLES:
-
-  Dial measurement:
-  GD.cmd_gauge(<x position>, <y position>, <radius>, <centering options>, <minor ticks>, <major ticks>, <value>, <range>);
-
-  Plain text: (only ASCII characters 0-127 supported, idk why)
-  GD.cmd_text(<x position>, <y position>, <text size (kind of), use 31>, <centering options>, <char textArray[]>);
-
-  Progress bar:
-  GD.cmd_progress(<xpos>, <ypos>, <width>, <height>, <centering options>, <value>, <range>); 
- */
-
-}
-
-// TODO: Get ambient temperature
-int GetTempAmb(){
-  return 70;
-}
-
-// TODO: Get ambient temperature
-int GetTempCVT(){
-  return 70;
-}
-
-// TODO: Get engine rpm
-int GetRPM(){
-  return 500;
-}
-
-// TODO: Get fuel level (0-100%)
-int GetFuelLevel(){
-  return 85;
-}
