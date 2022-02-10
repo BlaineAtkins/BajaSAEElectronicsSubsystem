@@ -106,7 +106,7 @@ void Vehicle::Display(){
   GD.ColorRGB(0xffffff); // Set text/element color
 
   // Display run time
-  int timeMin = (int)(millis()/6000.0);
+  int timeMin = (int)(millis()/60000.0);
   String timeString = (String)timeMin + "min";
   char timeChar[100];
   timeString.toCharArray(timeChar, 100);
@@ -135,8 +135,7 @@ void Vehicle::Display(){
   rpmString.toCharArray(rpmChar, 10);
   GD.cmd_gauge(170, GD.h/2+50, 200, OPT_NOBACK, 20, 100, deleteThis, 750);
   GD.cmd_text(170, GD.h/2+100, 31, OPT_CENTER, rpmChar);
-  GD.cmd_text(170, GD.h/2+130, 31, OPT_CENTER, "RPM");
-  GD.cmd_text(170, GD.h/2+170, 18, OPT_CENTER, "RPM");
+  GD.cmd_text(170, GD.h/2+130, 29, OPT_CENTER, "RPM");
 
   // Display vehicle speed
   String speedString = (String)this->speedMPH;
