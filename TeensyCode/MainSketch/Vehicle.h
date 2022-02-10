@@ -14,6 +14,7 @@ private:
 
     void BeginDisplay();
 
+
     int tempAmb = 0;
     int tempCVT = 0;
     int speedMPH = 25;
@@ -43,6 +44,6 @@ public:
 //    void AppendChar(char* char1, char* char2, int l1, int l2);
     void Display();
     void ResetTimer();
-
+    void Fuckass();
 };
 #endif

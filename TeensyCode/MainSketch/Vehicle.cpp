@@ -11,6 +11,7 @@ void Vehicle::BeginDisplay(){
 }
 
 
+
 // Set start time to current time, so runTime == 0
 void Vehicle::ResetTimer(){
   this->startTime = millis();
