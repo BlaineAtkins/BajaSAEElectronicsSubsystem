@@ -7,13 +7,13 @@
             "compilerArgs": [],
             "intelliSenseMode": "windows-msvc-x86",
             "includePath": [
-                "C:\\Users\\maxwe\\Documents\\Arduino\\Github\\BajaSAEElectronicsSubsystem\\TeensyCode\\**",
-                "C:\\Users\\maxwe\\Documents\\Arduino\\libraries\\**",
+                "C:\\Users\\maxwe\\Documents\\Arduino\\**",
+                "C:\\Users\\maxwe\\Documents\\Github\\BajaSAEElectronicsSubsystem\\**",
                 "C:\\Program Files (x86)\\Arduino\\**"
             ],
             "forcedInclude": [],
-            "cStandard": "c17",
-            "cppStandard": "c++17",
+            "cStandard": "c11",
+            "cppStandard": "c++11",
             "defines": [
                 "_DEBUG",
                 "UNICODE",
@@ -22,9 +22,8 @@
         },
         {
             "name": "Arduino",
-            "compilerPath": "C:\\Users\\maxwe\\AppData\\Local\\Arduino15\\packages\\arduino\\tools\\avr-gcc\\7.3.0-atmel3.6.1-arduino7\\bin\\avr-g++",
+            "compilerPath": "C:\\Program Files (x86)\\Arduino\\hardware\\tools\\avr\\bin\\avr-g++",
             "compilerArgs": [
-                "-w",
                 "-std=gnu++11",
                 "-fpermissive",
                 "-fno-exceptions",
@@ -33,33 +32,31 @@
                 "-fno-threadsafe-statics",
                 "-Wno-error=narrowing"
             ],
-            "intelliSenseMode": "gcc-x64",
+            "intelliSenseMode": "windows-msvc-x86",
             "includePath": [
-                "C:\\Users\\maxwe\\AppData\\Local\\Arduino15\\packages\\arduino\\hardware\\avr\\1.8.3\\cores\\arduino",
-                "C:\\Users\\maxwe\\AppData\\Local\\Arduino15\\packages\\arduino\\hardware\\avr\\1.8.3\\variants\\mega",
+                "C:\\Program Files (x86)\\Arduino\\hardware\\arduino\\avr\\cores\\arduino",
+                "C:\\Program Files (x86)\\Arduino\\hardware\\arduino\\avr\\variants\\mega",
                 "C:\\Users\\maxwe\\Documents\\Arduino\\libraries\\TinyGPSPlus\\src",
-                "C:\\Users\\maxwe\\AppData\\Local\\Arduino15\\packages\\arduino\\hardware\\avr\\1.8.3\\libraries\\SoftwareSerial\\src",
-                "C:\\Users\\maxwe\\AppData\\Local\\Arduino15\\packages\\arduino\\hardware\\avr\\1.8.3\\libraries\\Wire\\src",
-                "C:\\Users\\maxwe\\AppData\\Local\\Arduino15\\packages\\arduino\\hardware\\avr\\1.8.3\\libraries\\SPI\\src",
-                "C:\\Users\\maxwe\\Documents\\Arduino\\libraries\\Adafruit_LSM9DS1_Library",
-                "C:\\Users\\maxwe\\Documents\\Arduino\\libraries\\Adafruit_BusIO",
-                "C:\\Users\\maxwe\\Documents\\Arduino\\libraries\\Adafruit_LIS3MDL",
+                "C:\\Program Files (x86)\\Arduino\\hardware\\arduino\\avr\\libraries\\SoftwareSerial\\src",
+                "C:\\Program Files (x86)\\Arduino\\hardware\\arduino\\avr\\libraries\\Wire\\src",
+                "C:\\Program Files (x86)\\Arduino\\hardware\\arduino\\avr\\libraries\\SPI\\src",
+                "C:\\Users\\maxwe\\Documents\\Arduino\\libraries\\Adafruit_LSM9DS1-master",
                 "C:\\Users\\maxwe\\Documents\\Arduino\\libraries\\Adafruit_Sensor-1.0.2",
-                "C:\\Users\\maxwe\\AppData\\Local\\Arduino15\\packages\\arduino\\hardware\\avr\\1.8.3\\libraries\\EEPROM\\src",
+                "C:\\Program Files (x86)\\Arduino\\hardware\\arduino\\avr\\libraries\\EEPROM\\src",
                 "C:\\Users\\maxwe\\Documents\\Arduino\\libraries\\Gameduino2",
                 "C:\\Program Files (x86)\\Arduino\\libraries\\SD\\src",
-                "c:\\users\\maxwe\\appdata\\local\\arduino15\\packages\\arduino\\tools\\avr-gcc\\7.3.0-atmel3.6.1-arduino7\\lib\\gcc\\avr\\7.3.0\\include",
-                "c:\\users\\maxwe\\appdata\\local\\arduino15\\packages\\arduino\\tools\\avr-gcc\\7.3.0-atmel3.6.1-arduino7\\lib\\gcc\\avr\\7.3.0\\include-fixed",
-                "c:\\users\\maxwe\\appdata\\local\\arduino15\\packages\\arduino\\tools\\avr-gcc\\7.3.0-atmel3.6.1-arduino7\\avr\\include"
+                "c:\\program files (x86)\\arduino\\hardware\\tools\\avr\\lib\\gcc\\avr\\7.3.0\\include",
+                "c:\\program files (x86)\\arduino\\hardware\\tools\\avr\\lib\\gcc\\avr\\7.3.0\\include-fixed",
+                "c:\\program files (x86)\\arduino\\hardware\\tools\\avr\\avr\\include"
             ],
             "forcedInclude": [
-                "C:\\Users\\maxwe\\AppData\\Local\\Arduino15\\packages\\arduino\\hardware\\avr\\1.8.3\\cores\\arduino\\Arduino.h"
+                "C:\\Program Files (x86)\\Arduino\\hardware\\arduino\\avr\\cores\\arduino\\Arduino.h"
             ],
-            "cStandard": "c11",
-            "cppStandard": "c++11",
+            "cStandard": "c17",
+            "cppStandard": "c++17",
             "defines": [
                 "F_CPU=16000000L",
-                "ARDUINO=10812",
+                "ARDUINO=10819",
                 "ARDUINO_AVR_MEGA2560",
                 "ARDUINO_ARCH_AVR",
                 "__DBL_MIN_EXP__=(-125)",

@@ -16,8 +16,8 @@ private:
 
     int tempAmb = 0;
     int tempCVT = 0;
-    int speedMPH = 0;
-    int rpm = 0; // 0-1000
+    int speedMPH = 25;
+    int rpm = 500; // 0-1000
     int fuel = 100; // 0-100
     int runTime = 0;
     int startTime = 0;
@@ -40,6 +40,7 @@ public:
     int GetTempAmb();
     int GetTempCVT();
     int GetRPM();
+//    void AppendChar(char* char1, char* char2, int l1, int l2);
     void Display();
     void ResetTimer();
 

@@ -1,9 +1,9 @@
-#include <TinyGPS++.h> //DIFFERENT FROM TinyGPS! Forgot if this is from arduino library manager or github
-#include <SoftwareSerial.h> //also forget if this is from arduino library manager or github for 9dof
+//#include <TinyGPS++.h> //DIFFERENT FROM TinyGPS! Forgot if this is from arduino library manager or github
+//#include <SoftwareSerial.h> //also forget if this is from arduino library manager or github for 9dof
 #include <Wire.h>
 #include <SPI.h>
-#include <Adafruit_LSM9DS1.h> //installed from Arduino library manager, search for Adafruit LSM9DS1 and click yes to install dependancies
-#include <Adafruit_Sensor.h>  // not used but required!
+//#include <Adafruit_LSM9DS1.h> //installed from Arduino library manager, search for Adafruit LSM9DS1 and click yes to install dependancies
+//#include <Adafruit_Sensor.h>  // not used but required!
 #include "Vehicle.h"
 // NOTE: Display uses pins 6-13
 
@@ -38,14 +38,14 @@ double ndofGyroZ;  // rad/s
 //for GPS
 static const int gpsRXPin = 4, gpsTXPin = 3;
 static const uint32_t GPSBaud = 9600; 
-TinyGPSPlus gps; // The TinyGPS++ object
-SoftwareSerial ss(gpsRXPin, gpsTXPin); // The serial connection to the GPS device
+//TinyGPSPlus gps; // The TinyGPS++ object
+//SoftwareSerial ss(gpsRXPin, gpsTXPin); // The serial connection to the GPS device
 
 // TODO: defines can go at the top, lsm probably shouldn't be global
 //for 9dof
-Adafruit_LSM9DS1 lsm = Adafruit_LSM9DS1();
-#define LSM9DS1_SCK A5
-#define LSM9DS1_MOSI A4
+//Adafruit_LSM9DS1 lsm = Adafruit_LSM9DS1();
+//#define LSM9DS1_SCK A5
+//#define LSM9DS1_MOSI A4
 
 
 void setup() {
@@ -57,6 +57,7 @@ void setup() {
   
   // Initizlize Communications
   Serial.begin(115200);
+/*
   ss.begin(GPSBaud);
 
   //9dof setup (accelerometer, magnetometer, gyroscope)
@@ -66,7 +67,8 @@ void setup() {
   lsm.setupAccel(lsm.LSM9DS1_ACCELRANGE_2G); //Accelerometer range can be set range higher by changing 2G to 4G, 8G or 16G
   lsm.setupMag(lsm.LSM9DS1_MAGGAIN_4GAUSS); //magnetometer sensitivity can be set higher with 8GAUSS 12GAUSS or 16GAUSS
   lsm.setupGyro(lsm.LSM9DS1_GYROSCALE_245DPS); //Gyroscope can be changed to 500DPS or 2000DPS
-}
+*/
+} 
 
 void loop() {
   Vehicle Baja;
@@ -92,7 +94,7 @@ void loop() {
 }
 
 
-
+/*
 void displayToLCD(){
   bool validSpeed=true;
   if(gpsSpeed==NULL || gps.speed.age()>2000){ //if we didn't get a valid speed or the speed data was collected over 2 seconds ago
@@ -245,12 +247,4 @@ void handleGPS(){
   }
   //Serial.print(gps.speed.age()); //not sure where/if this is useful yet...
 }
-
-
-
-
-
-
-
-
-
+*/

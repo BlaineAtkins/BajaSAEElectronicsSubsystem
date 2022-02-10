@@ -2,7 +2,6 @@
 #include <SPI.h>
 #include <GD2.h>
 #include <SD.h>
-#include <time.h>
 #include "Vehicle.h"
 
 
@@ -14,13 +13,14 @@ void Vehicle::BeginDisplay(){
 
 // Set start time to current time, so runTime == 0
 void Vehicle::ResetTimer(){
-  this->startTime = time(0);
+  this->startTime = millis();
 }
 
 
 
 int Vehicle::GetRunTime(){
-    this->runTime = time(0) - this->startTime;
+    this->runTime = millis() - this->startTime;
+    return this->runTime;
 }
 
 
@@ -105,18 +105,63 @@ void Vehicle::Display(){
   GD.Clear();
   GD.ColorRGB(0xffffff); // Set text/element color
 
+  // Display run time
+  int timeMin = (int)(millis()/6000.0);
+  String timeString = (String)timeMin + "min";
+  char timeChar[100];
+  timeString.toCharArray(timeChar, 100);
+  GD.cmd_text(GD.w-130, 30, 31, OPT_CENTER, "Run Time:");
+  GD.cmd_text(GD.w-130, 70, 31, OPT_CENTER, timeChar);
+
+  // Display CVT temperature
+  int cvtTemp = this->tempCVT;
+  String cvtString = "CVT: " + (String)cvtTemp + "C";
+  char cvtChar[20];
+  cvtString.toCharArray(cvtChar, 20);
+  GD.cmd_text(10, 70, 31, OPT_CENTERY, cvtChar);
+
+  // Display ambient temperature
+  int ambTemp = this->tempAmb;
+  String ambString = "Ambient: " + (String)ambTemp + "C / " + (String)((int)(1.8*ambTemp+32)) + "F";
+  char ambChar[20];
+  ambString.toCharArray(ambChar, 20);
+  GD.cmd_text(10, 30, 31, OPT_CENTERY, ambChar);
+
   // Display engine RPM
-  String rpmString = (String)this->rpm;
+  int deleteThis = this->rpm;
+  deleteThis = deleteThis + rand()%25 - rand()%25;
+  String rpmString = (String)deleteThis;
   char rpmChar[10];
   rpmString.toCharArray(rpmChar, 10);
-  GD.cmd_gauge(GD.w/2, GD.h/2, 100, OPT_NOBACK, 20, 100, rpmChar, 750);
-  GD.cmd_text(GD.w/2, GD.h/2+50, 31, OPT_CENTER, rpmChar);
-  GD.cmd_text(GD.w/2, GD.h/2+80, 29, OPT_CENTER, "RPM");
+  GD.cmd_gauge(170, GD.h/2+50, 200, OPT_NOBACK, 20, 100, deleteThis, 750);
+  GD.cmd_text(170, GD.h/2+100, 31, OPT_CENTER, rpmChar);
+  GD.cmd_text(170, GD.h/2+130, 31, OPT_CENTER, "RPM");
+  GD.cmd_text(170, GD.h/2+170, 18, OPT_CENTER, "RPM");
+
+  // Display vehicle speed
+  String speedString = (String)this->speedMPH;
+  char speedChar[10];
+  speedString.toCharArray(speedChar, 10);
+  GD.cmd_gauge(GD.w-170, GD.h/2+50, 200, OPT_NOBACK, 5, 10, this->speedMPH, 40);
+  GD.cmd_text(GD.w-170, GD.h/2+100, 31, OPT_CENTER, speedChar);
+  GD.cmd_text(GD.w-170, GD.h/2+130, 29, OPT_CENTER, "MPH");
 
   //Display fuel level
-  GD.cmd_progress(GD.w-35, 70, 25, GD.h-90, OPT_CENTER, this->fuel, 100);
-  GD.cmd_text(GD.w-23, 30, 31, OPT_CENTER, "F");
-
+  String fuelString = (String)this->fuel;
+  char fuelChar[10];
+  fuelString.toCharArray(fuelChar, 10);
+  GD.cmd_text(75, GD.h-25, 31, OPT_CENTER, "F:        %");
+  int green = this->fuel*2;
+  int red = abs(200-green); // absolute value just in case
+  GD.ColorRGB(red+50, green+50, 0);
+  GD.cmd_text(75, GD.h-25, 31, OPT_CENTER, fuelChar);
+  GD.ColorRGB(red, green, 0);
+  GD.cmd_progress(160, GD.h-40, GD.w-180, 30, OPT_CENTER, this->fuel, 100);
+  this->fuel = this->fuel-1;
+  Serial.println(this->fuel);
+  if(this->fuel < 0){
+    this->fuel = 100;
+  }
   GD.swap();
   
 /* DISPLAY EXAMPLES:
@@ -131,13 +176,3 @@ void Vehicle::Display(){
   GD.cmd_progress(<xpos>, <ypos>, <width>, <height>, <centering options>, <value>, <range>); 
  */
 }
-
-
-
-
-
-
-
-
-
-
