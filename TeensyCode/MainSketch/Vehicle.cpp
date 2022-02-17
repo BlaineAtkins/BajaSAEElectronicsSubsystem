@@ -31,14 +31,13 @@ int Vehicle::GetSpeedMPH(){
 }
 
 
-
 // TODO: include all data in write pass
 // Write all data to SD card with time stamp
 bool Vehicle::WriteToSD(){
   SD.begin(254);
   File dataFile = SD.open("VehicleData.txt", FILE_WRITE);
   if(dataFile){ // 254==BUILTIN_SDCARD, set 
-    dataFile.print((int)time(0));
+    dataFile.print((int)(millis()/1000));
     dataFile.print(",");
     dataFile.print(this->runTime);
     dataFile.print(",");

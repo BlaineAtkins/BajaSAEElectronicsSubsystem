@@ -26,11 +26,12 @@ private:
     double accelerometer[3] = {0, 0, 0}; // x, y, z
     double brakePressure = 0;
     // TODO: orientation
-
+    
 public:
     Vehicle(){ // Constructor
         this->BeginDisplay(); // Can't call GD.begin() from header >:(
         this->ResetTimer();
+
     }
     ~Vehicle(){}; // Destructor
 
@@ -44,6 +45,5 @@ public:
 //    void AppendChar(char* char1, char* char2, int l1, int l2);
     void Display();
     void ResetTimer();
-    void Fuckass();
 };
 #endif

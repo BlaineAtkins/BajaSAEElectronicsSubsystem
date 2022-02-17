@@ -33,6 +33,12 @@ double ndofGyroX;  // rad/s
 double ndofGyroY;  // rad/s
 double ndofGyroZ;  // rad/s
 
+//for hall effect spedometer
+int numMagnets=4;
+float tireDiameter=0.6604;
+unsigned long timerVehicleSpeed;
+int runningAvgHallSpedometer[4];
+
 
 // TODO: This probably shouldn't be global
 //for GPS
@@ -57,6 +63,11 @@ void setup() {
   
   // Initizlize Communications
   Serial.begin(115200);
+
+  //Hall Effect spedometer
+  pinMode(2,INPUT); //for hall effect MPH sensor -- must be an interrupt capable pin.
+  attachInterrupt(digitalPinToInterrupt(2), InterruptMagSpeedTransition, CHANGE); //set ISR for hall effect sensor
+  
 /*
   ss.begin(GPSBaud);
 
@@ -91,6 +102,39 @@ void loop() {
     delay(50);
   }
   exit(0);
+}
+
+void InterruptMagSpeedTransition(){
+  float rpm;
+  float hz;
+  float vehicleSpeedMetersPS;
+  float vehicleSpeedMPH;
+  float timeBetweenUpdates;
+  
+  long elapsedTimeVehicleSpeed=millis()-timerVehicleSpeed;
+  timerVehicleSpeed=millis(); //reset timerVehicleSpeed
+  timeBetweenUpdates=elapsedTimeVehicleSpeed/1000.0;
+
+  //Average last few values using HZ
+  runningAvgHallSpedometer[0]=runningAvgHallSpedometer[1];
+  runningAvgHallSpedometer[1]=runningAvgHallSpedometer[2];
+  runningAvgHallSpedometer[2]=runningAvgHallSpedometer[3];
+  runningAvgHallSpedometer[3]=elapsedTimeVehicleSpeed;
+
+  elapsedTimeVehicleSpeed=0;
+  for(int i=0;i<4;i++){
+    elapsedTimeVehicleSpeed+=runningAvgHallSpedometer[i];
+  }
+  elapsedTimeVehicleSpeed=elapsedTimeVehicleSpeed/4;
+  
+  hz = 1.0/(((elapsedTimeVehicleSpeed/1000.0)*numMagnets)); 
+
+  rpm = hz*60;
+
+  float pointDistance = (PI*tireDiameter)/numMagnets; //distance between two adjacent magnets, scaled to distance on tire
+  vehicleSpeedMetersPS = pointDistance/(elapsedTimeVehicleSpeed/1000.0); // m/s
+  vehicleSpeedMPH = vehicleSpeedMetersPS*(1/1609.34)*(3600/1);      //*(miles/meter)*(seconds/hour)
+ 
 }
 
 
