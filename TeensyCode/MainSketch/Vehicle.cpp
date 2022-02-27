@@ -157,7 +157,7 @@ void Vehicle::Display(){
   GD.ColorRGB(red, green, 0);
   GD.cmd_progress(160, GD.h-40, GD.w-180, 30, OPT_CENTER, this->fuel, 100);
   this->fuel = this->fuel-1;
-  Serial.println(this->fuel);
+  //Serial.println(this->fuel);
   if(this->fuel < 0){
     this->fuel = 100;
   }

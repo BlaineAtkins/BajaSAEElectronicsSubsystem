@@ -40,6 +40,9 @@ unsigned long timerVehicleSpeed;
 int runningAvgHallSpedometer[4];
 
 
+float vehicleSpeedMPH=0;
+
+
 // TODO: This probably shouldn't be global
 //for GPS
 static const int gpsRXPin = 4, gpsTXPin = 3;
@@ -100,6 +103,12 @@ void loop() {
   while(1){
     Baja.Display();
     delay(50);
+
+    if(millis()-timerVehicleSpeed>1000){
+      vehicleSpeedMPH=0;
+    }
+    Baja.speedMPH=vehicleSpeedMPH;
+    
   }
   exit(0);
 }
@@ -108,7 +117,6 @@ void InterruptMagSpeedTransition(){
   float rpm;
   float hz;
   float vehicleSpeedMetersPS;
-  float vehicleSpeedMPH;
   float timeBetweenUpdates;
   
   long elapsedTimeVehicleSpeed=millis()-timerVehicleSpeed;
@@ -130,11 +138,12 @@ void InterruptMagSpeedTransition(){
   hz = 1.0/(((elapsedTimeVehicleSpeed/1000.0)*numMagnets)); 
 
   rpm = hz*60;
+  Serial.println(rpm);
 
   float pointDistance = (PI*tireDiameter)/numMagnets; //distance between two adjacent magnets, scaled to distance on tire
   vehicleSpeedMetersPS = pointDistance/(elapsedTimeVehicleSpeed/1000.0); // m/s
   vehicleSpeedMPH = vehicleSpeedMetersPS*(1/1609.34)*(3600/1);      //*(miles/meter)*(seconds/hour)
- 
+  
 }
 
 

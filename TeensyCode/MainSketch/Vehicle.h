@@ -17,7 +17,6 @@ private:
 
     int tempAmb = 0;
     int tempCVT = 0;
-    int speedMPH = 25;
     int rpm = 500; // 0-1000
     int fuel = 100; // 0-100
     int runTime = 0;
@@ -34,6 +33,8 @@ public:
 
     }
     ~Vehicle(){}; // Destructor
+
+    int speedMPH = 0;
 
     bool WriteToSD();
     int GetSpeedMPH();
