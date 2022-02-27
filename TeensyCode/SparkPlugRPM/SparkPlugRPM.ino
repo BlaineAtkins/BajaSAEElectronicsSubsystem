@@ -19,7 +19,7 @@ bool lastPole=true;
 
 void setup() {
   // put your setup code here, to run once:
-  Serial.begin(9600); //change to 11500 to print faster when printing magnetic rotations
+  Serial.begin(19200); //change to 11500 to print faster when printing magnetic rotations
   pinMode(LED_BUILTIN,OUTPUT);
   pinMode(2,INPUT); //must be an interrupt capable pin. 
   /*LM339 comparator connections:
@@ -29,7 +29,7 @@ void setup() {
    */
 
   pinMode(2,INPUT); //must be an interrupt capable pin.
-  attachInterrupt(digitalPinToInterrupt(2), interruptMagSpeedTransition, CHANGE);
+  attachInterrupt(digitalPinToInterrupt(2), interruptMagSpeedTransition, RISING);
 }
 
 void interruptMagSpeedTransition(){
@@ -68,14 +68,13 @@ void loop() {
     vehicleSpeedMetersPS=0;
     vehicleSpeedMPH=0;
   }
-
   //Serial.println(rpm);
-  Serial.print("HZ: ");
+  Serial.print("HZ:\t");
   Serial.print(hz,4);
   Serial.print("\t");
-  Serial.print("RPM: ");
+  Serial.print("RPM:\t");
   Serial.print(rpm,1);
-  Serial.print("\t");
+  /*Serial.print("\t");
   Serial.print("Speed: ");
   Serial.print(vehicleSpeedMetersPS);
   Serial.print(" m/s");
@@ -83,5 +82,6 @@ void loop() {
   Serial.print(vehicleSpeedMPH);
   Serial.print(" mph");
   Serial.print("\tTime between updates (s): ");
-  Serial.println(timeBetweenUpdates);
+  Serial.print(timeBetweenUpdates);*/
+  Serial.println();
 }
