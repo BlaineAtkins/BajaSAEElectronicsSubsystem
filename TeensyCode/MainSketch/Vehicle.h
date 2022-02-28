@@ -5,15 +5,14 @@
     -Confirm gps, accelerometer, brake pressure data types
     -Add orientation variable + related functions
     -Function TODOs and descriptions
+    -Block out pins/code for display panel buttons
     -Complete this todo list lol
-
 */
 
 class Vehicle{
 private:
 
     void BeginDisplay();
-
 
     int tempAmb = 0;
     int tempCVT = 0;
@@ -29,8 +28,6 @@ private:
 public:
     Vehicle(){ // Constructor
         this->BeginDisplay(); // Can't call GD.begin() from header >:(
-        this->ResetTimer();
-
     }
     ~Vehicle(){}; // Destructor
 
@@ -38,13 +35,11 @@ public:
 
     bool WriteToSD();
     int GetSpeedMPH();
-    int GetRunTime();
     int GetFuelLevel();
     int GetTempAmb();
     int GetTempCVT();
     int GetRPM();
 //    void AppendChar(char* char1, char* char2, int l1, int l2);
     void Display();
-    void ResetTimer();
 };
 #endif

@@ -11,20 +11,6 @@ void Vehicle::BeginDisplay(){
 }
 
 
-
-// Set start time to current time, so runTime == 0
-void Vehicle::ResetTimer(){
-  this->startTime = millis();
-}
-
-
-
-int Vehicle::GetRunTime(){
-    this->runTime = millis() - this->startTime;
-    return this->runTime;
-}
-
-
 // TODO: change to collect, store, and return speed
 int Vehicle::GetSpeedMPH(){
   return this->speedMPH;
@@ -39,7 +25,7 @@ bool Vehicle::WriteToSD(){
   if(dataFile){ // 254==BUILTIN_SDCARD, set 
     dataFile.print((int)(millis()/1000));
     dataFile.print(",");
-    dataFile.print(this->runTime);
+    dataFile.print(millis()/1000.0);
     dataFile.print(",");
     dataFile.print(this->fuel);
     dataFile.print(",");
@@ -101,9 +87,13 @@ int Vehicle::GetFuelLevel(){
 // Refresh display with new data
 void Vehicle::Display(){
   // Formatting
+  int textColor = 0xffffff; // White text
+  textColor = 0; // Black text
+
   GD.ClearColorRGB(0, 0, 40); // Set background color
+  GD.ClearColorRGB(0xffffff); // override to white background
   GD.Clear();
-  GD.ColorRGB(0xffffff); // Set text/element color
+  GD.ColorRGB(textColor); // Set text/element color
 
   // Display run time
   int timeMin = (int)(millis()/60000.0);
@@ -150,15 +140,19 @@ void Vehicle::Display(){
   char fuelChar[10];
   fuelString.toCharArray(fuelChar, 10);
   GD.cmd_text(75, GD.h-25, 31, OPT_CENTER, "F:        %");
-  int green = this->fuel*2;
-  int red = abs(200-green); // absolute value just in case
-  GD.ColorRGB(red+50, green+50, 0);
   GD.cmd_text(75, GD.h-25, 31, OPT_CENTER, fuelChar);
-  GD.ColorRGB(red, green, 0);
+
+  if(fuel > 49)
+    GD.ColorRGB(0, 255, 0); // Green
+  else if(fuel > 20)
+    GD.ColorRGB(255, 255, 0); // Yellow
+  else
+    GD.ColorRGB(255, 0, 0); // Red
+
   GD.cmd_progress(160, GD.h-40, GD.w-180, 30, OPT_CENTER, this->fuel, 100);
+
   this->fuel = this->fuel-1;
-  //Serial.println(this->fuel);
-  if(this->fuel < 0){
+  if(this->fuel < 0){ // REMOVE THIS WHEN ACTUAL FUEL PUT IN
     this->fuel = 100;
   }
   GD.swap();

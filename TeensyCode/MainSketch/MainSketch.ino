@@ -5,7 +5,7 @@
 //#include <Adafruit_LSM9DS1.h> //installed from Arduino library manager, search for Adafruit LSM9DS1 and click yes to install dependancies
 //#include <Adafruit_Sensor.h>  // not used but required!
 #include "Vehicle.h"
-// NOTE: Display uses pins 6-13
+// NOTE: Display uses pins 8-13
 
 
 // TODO: Do these need to be global? My computer science teacher will inflict
@@ -58,11 +58,6 @@ static const uint32_t GPSBaud = 9600;
 
 
 void setup() {
-  // Initialize Pins
-  pinMode(6, OUTPUT);
-  pinMode(7, OUTPUT);
-  digitalWrite(6, LOW);
-  digitalWrite(7, LOW);
   
   // Initizlize Communications
   Serial.begin(115200);
