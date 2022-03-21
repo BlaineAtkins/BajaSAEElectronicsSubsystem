@@ -8,6 +8,7 @@
 // NOTE: Display uses pins 8-13
 
 
+
 // TODO: Do these need to be global? My computer science teacher will inflict
 //       psychic damage to me from across campus if I use global variables
 //       when they could be local variables in a function (or a class)
@@ -65,7 +66,7 @@ void setup() {
   //Hall Effect spedometer
   pinMode(2,INPUT); //for hall effect MPH sensor -- must be an interrupt capable pin.
   attachInterrupt(digitalPinToInterrupt(2), InterruptMagSpeedTransition, CHANGE); //set ISR for hall effect sensor
-  
+
 /*
   ss.begin(GPSBaud);
 
@@ -81,7 +82,7 @@ void setup() {
 
 void loop() {
   Vehicle Baja;
-
+  
 /* GPS setup to be parsed by Blaine
   if (ss.available()>0 && gps.encode(ss.read())){ //if we're getting GPS data
     handleGPS();
@@ -102,7 +103,9 @@ void loop() {
     if(millis()-timerVehicleSpeed>1000){
       vehicleSpeedMPH=0;
     }
-    Baja.speedMPH=vehicleSpeedMPH;
+    Baja.speedMPH=vehicleSpeedMPH; //vehicleSpeedMPH is a global variable set by InterruptMagSpeedTransition()
+
+    Baja.GetTempAmb();
     
   }
   exit(0);

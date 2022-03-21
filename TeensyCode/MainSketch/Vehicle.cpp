@@ -4,10 +4,21 @@
 #include <SD.h>
 #include "Vehicle.h"
 
+//for ambient temp
+#include <OneWire.h> //download from https://github.com/PaulStoffregen/OneWire for teensy compatible
+#include <DallasTemperature.h> //download on step 3 from https://create.arduino.cc/projecthub/TheGadgetBoy/ds18b20-digital-temperature-sensor-and-arduino-9cc806
+#define ONE_WIRE_BUS 31
+OneWire oneWire(ONE_WIRE_BUS); //this bus can be used for other OneWire devices too
+DallasTemperature sensors(&oneWire);
+
 
 // Initialize display
 void Vehicle::BeginDisplay(){
+  Serial.println("If you get stuck here, the display is disconnected. Please connect display to boot.");
   GD.begin(0);
+  //for ambient temperature
+  sensors.begin();
+  sensors.setWaitForConversion(false); //don't wait ~750 ms for temp to return new value
 }
 
 
@@ -54,6 +65,17 @@ bool Vehicle::WriteToSD(){
 
 // TODO: Get ambient temperature
 int Vehicle::GetTempAmb(){
+  sensors.requestTemperatures();
+  
+  float rawTemp=sensors.getTempCByIndex(0); //0 is first IC on wire
+  //Serial.print(rawTemp);
+  float rawHigh=97.00; //value from sensor at boiling
+  float rawLow=0; //value from sensor at melting
+  float referenceHigh=100; //reference value at boiling (based on altitude)
+  float referenceLow=0; //reference value at melting (based on altitude)
+
+  this->tempAmb = (((rawTemp-rawLow)*(referenceHigh-referenceLow))/(rawHigh-rawLow))+referenceLow;
+
   return this->tempAmb;
 }
 

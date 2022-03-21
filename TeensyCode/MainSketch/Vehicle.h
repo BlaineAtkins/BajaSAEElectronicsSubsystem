@@ -14,7 +14,7 @@ private:
 
     void BeginDisplay();
 
-    int tempAmb = 0;
+    float tempAmb = 0;
     int tempCVT = 0;
     int rpm = 500; // 0-1000
     int fuel = 100; // 0-100
