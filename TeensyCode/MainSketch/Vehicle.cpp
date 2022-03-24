@@ -84,6 +84,9 @@ int Vehicle::GetTempAmb(){
 // Gets CVT temperature from sensor and returns as int
 // TODO: Get ambient temperature
 int Vehicle::GetTempCVT(){
+  float voltage = 3.3/1024*analogRead(41);
+  this->tempCVT = voltage/3*450-70; //equation from manufacturer website and verified
+  Serial.println(this->tempCVT);
   return this->tempCVT;
 }
 

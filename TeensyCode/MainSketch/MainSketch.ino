@@ -67,6 +67,9 @@ void setup() {
   pinMode(2,INPUT); //for hall effect MPH sensor -- must be an interrupt capable pin.
   attachInterrupt(digitalPinToInterrupt(2), InterruptMagSpeedTransition, CHANGE); //set ISR for hall effect sensor
 
+  //CVT infrared sensor
+  pinMode(41,INPUT);
+  
 /*
   ss.begin(GPSBaud);
 
@@ -106,6 +109,7 @@ void loop() {
     Baja.speedMPH=vehicleSpeedMPH; //vehicleSpeedMPH is a global variable set by InterruptMagSpeedTransition()
 
     Baja.GetTempAmb();
+    Baja.GetTempCVT();
     
   }
   exit(0);
