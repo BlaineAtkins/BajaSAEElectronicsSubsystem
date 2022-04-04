@@ -2,6 +2,7 @@
 #include <SPI.h>
 #include <GD2.h>
 #include <SD.h>
+#include <TinyGPS++.h> //DIFFERENT FROM TinyGPS! Forgot if this is from arduino library manager or github
 #include "Vehicle.h"
 
 //for ambient temp
@@ -10,6 +11,9 @@
 #define ONE_WIRE_BUS 31
 OneWire oneWire(ONE_WIRE_BUS); //this bus can be used for other OneWire devices too
 DallasTemperature sensors(&oneWire);
+
+//for GPS
+TinyGPSPlus gps;
 
 
 // Initialize display
@@ -61,9 +65,115 @@ bool Vehicle::WriteToSD(){
   return false;
 }
 
+void Vehicle::DisplayGPSOnSerial(){ 
+  Serial.print(F("Location: ")); 
+  if (this->gpsLat!=NULL && this->gpsLng!=NULL){
+    Serial.print(this->gpsLat, 6);
+    Serial.print(F(","));
+    Serial.print(this->gpsLng, 6);
+  }
+  else{
+    Serial.print(F("INVALID"));
+  }
+
+  Serial.print(F("  Date/Time: "));
+  if (this->gpsMonth!=NULL && this->gpsDay!=NULL && this->gpsYear!=NULL){
+    Serial.print(this->gpsMonth);
+    Serial.print(F("/"));
+    Serial.print(this->gpsDay);
+    Serial.print(F("/"));
+    Serial.print(this->gpsYear);
+  }
+  else{
+    Serial.print(F("INVALID"));
+  }
+
+  Serial.print(F(" "));
+//  if (this->gpsHour!=NULL && this->gpsMinute!=NULL && this->gpsSecond!=NULL){ //returns invalid when h/m/s are 0
+    if (this->gpsHour < 10) Serial.print(F("0"));
+    Serial.print(this->gpsHour);
+    Serial.print(F(":"));
+    if (this->gpsMinute < 10) Serial.print(F("0"));
+    Serial.print(this->gpsMinute);
+    Serial.print(F(":"));
+    if (this->gpsSecond < 10) Serial.print(F("0"));
+    Serial.print(this->gpsSecond);
+/*  }
+  else{
+    Serial.print(F("INVALID"));
+  }*/
+
+  Serial.print("   Speed: ");
+  if(this->gpsSpeed!=NULL){  
+    Serial.print(this->gpsSpeed);
+    Serial.print(" mph");
+  }else{
+    Serial.print("INVALID");
+  }
+
+  Serial.print("   Heading: ");
+  if(this->gpsCourse!=NULL){
+    Serial.print(this->gpsCourse/100.0);
+    Serial.print(" degrees");
+  }else{
+    Serial.print("INVALID");
+  }
+
+  Serial.println();
+}
+
+void Vehicle::GetGPSData(){ //WARNING: if you only call this once per second, if you leave it running, within a minute you will notice that every once in awhile, if you print the data it gets stuck on one data point for several seconds. NOt sure why...
+  //if (Serial5.available()>0 && gps.encode(Serial5.read())){ //if we're getting GPS data
+  while(Serial5.available()){
+    gps.encode(Serial5.read());
+  }
+ 
+    if (gps.location.isValid()){
+      this->gpsLat=gps.location.lat();
+      this->gpsLng=gps.location.lng();
+    }else{
+     this->gpsLat=NULL;
+     this->gpsLng=NULL;
+    }
+  
+    if (gps.date.isValid()){
+      this->gpsMonth=gps.date.month();
+      this->gpsDay=gps.date.day();
+      this->gpsYear=gps.date.year();
+    }else{
+      this->gpsMonth=NULL;
+      this->gpsDay=NULL;
+      this->gpsYear=NULL;
+    }
+  
+    if (gps.time.isValid()){
+      this->gpsHour=gps.time.hour();
+      this->gpsMinute=gps.time.minute();
+      this->gpsSecond=gps.time.second();
+    }
+    else{
+      this->gpsHour=NULL;
+      this->gpsMinute=NULL;
+      this->gpsSecond=NULL;
+    }
+    
+    if(gps.speed.isValid()){
+      this->gpsSpeed=gps.speed.mph();
+    }else{
+      this->gpsSpeed=NULL;
+    }
+    if(gps.course.isValid()){
+      this->gpsCourse=gps.course.value();
+    }else{
+      this->gpsCourse=NULL;
+    }
+    //Serial.println(gps.time.second());
+    //Serial.print("Age of GPS data: ");
+    //Serial.println(gps.speed.age()); //not sure where/if this is useful yet...
+    
+}
 
 
-// TODO: Get ambient temperature
 int Vehicle::GetTempAmb(){
   sensors.requestTemperatures();
   
@@ -86,7 +196,7 @@ int Vehicle::GetTempAmb(){
 int Vehicle::GetTempCVT(){
   float voltage = 3.3/1024*analogRead(41);
   this->tempCVT = voltage/3*450-70; //equation from manufacturer website and verified
-  Serial.println(this->tempCVT);
+  //Serial.println(this->tempCVT);
   return this->tempCVT;
 }
 

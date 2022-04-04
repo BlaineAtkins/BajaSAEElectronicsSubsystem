@@ -13,7 +13,7 @@
 //       psychic damage to me from across campus if I use global variables
 //       when they could be local variables in a function (or a class)
 //Global Variables    set to NULL for invalid
-double gpsLat;
+/*double gpsLat;
 double gpsLng;
 double gpsSpeed;
 int gpsSecond;
@@ -22,7 +22,7 @@ int gpsHour;
 int gpsDay;
 int gpsMonth;
 int gpsYear;
-double gpsCourse;
+double gpsCourse;*/
 
 double ndofAccelX; // m/s^2
 double ndofAccelY; // m/s^2
@@ -37,17 +37,20 @@ double ndofGyroZ;  // rad/s
 //for hall effect spedometer
 int numMagnets=4;
 float tireDiameter=0.6604;
+float driveshaftRatio=2; //ex: if driveshaft spins twice as fast as tires, driveshaftRatio=2
 unsigned long timerVehicleSpeed;
 int runningAvgHallSpedometer[4];
 
 
 float vehicleSpeedMPH=0;
 
+//for GPS serial data buffer
+//unsigned char serial5buffer[512*100]; //use 512 byte chunks (i think)
 
 // TODO: This probably shouldn't be global
 //for GPS
-static const int gpsRXPin = 4, gpsTXPin = 3;
-static const uint32_t GPSBaud = 9600; 
+//static const int gpsRXPin = 4, gpsTXPin = 3;
+//static const uint32_t GPSBaud = 9600; 
 //TinyGPSPlus gps; // The TinyGPS++ object
 //SoftwareSerial ss(gpsRXPin, gpsTXPin); // The serial connection to the GPS device
 
@@ -62,6 +65,9 @@ void setup() {
   
   // Initizlize Communications
   Serial.begin(115200);
+
+  Serial5.begin(9600); //initialize GPS hardware serial
+  //Serial5.addMemoryForRead(serial5buffer, sizeof(serial5buffer));
 
   //Hall Effect spedometer
   pinMode(2,INPUT); //for hall effect MPH sensor -- must be an interrupt capable pin.
@@ -111,6 +117,10 @@ void loop() {
     Baja.GetTempAmb();
     Baja.GetTempCVT();
     
+    Baja.GetGPSData(); //Call this as often as possible! See comment on the function in Vehicle.cpp
+    //Baja.DisplayGPSOnSerial();
+   
+    
   }
   exit(0);
 }
@@ -145,7 +155,8 @@ void InterruptMagSpeedTransition(){
   float pointDistance = (PI*tireDiameter)/numMagnets; //distance between two adjacent magnets, scaled to distance on tire
   vehicleSpeedMetersPS = pointDistance/(elapsedTimeVehicleSpeed/1000.0); // m/s
   vehicleSpeedMPH = vehicleSpeedMetersPS*(1/1609.34)*(3600/1);      //*(miles/meter)*(seconds/hour)
-  
+  vehicleSpeedMetersPS=vehicleSpeedMetersPS/driveshaftRatio;
+  vehicleSpeedMPH=vehicleSpeedMPH/driveshaftRatio;
 }
 
 
@@ -183,62 +194,7 @@ void display9dofOnSerial(){
 
 
 
-void displayGPSOnSerial(){ //ONLY WORKS IF CALLED IN GPS READ IF STATEMENT. Likely because communicating with GPS receiver over serial conflicts with printing this much data to serial monitor. Teensy 4.1 has 8 serial ports instead of Nano's one, so we should be able to solve this by using a seperate serial port
-  Serial.print(F("Location: ")); 
-  if (gpsLat!=NULL && gpsLng!=NULL){
-    Serial.print(gpsLat, 6);
-    Serial.print(F(","));
-    Serial.print(gpsLng, 6);
-  }
-  else{
-    Serial.print(F("INVALID"));
-  }
 
-  Serial.print(F("  Date/Time: "));
-  if (gpsMonth!=NULL && gpsDay!=NULL && gpsYear!=NULL){
-    Serial.print(gpsMonth);
-    Serial.print(F("/"));
-    Serial.print(gpsDay);
-    Serial.print(F("/"));
-    Serial.print(gpsYear);
-  }
-  else{
-    Serial.print(F("INVALID"));
-  }
-
-  Serial.print(F(" "));
-  if (gpsHour!=NULL && gpsMinute!=NULL && gpsSecond!=NULL){
-    if (gpsHour < 10) Serial.print(F("0"));
-    Serial.print(gpsHour);
-    Serial.print(F(":"));
-    if (gpsMinute < 10) Serial.print(F("0"));
-    Serial.print(gpsMinute);
-    Serial.print(F(":"));
-    if (gpsSecond < 10) Serial.print(F("0"));
-    Serial.print(gpsSecond);
-  }
-  else{
-    Serial.print(F("INVALID"));
-  }
-
-  Serial.print("   Speed: ");
-  if(gpsSpeed!=NULL){  
-    Serial.print(gpsSpeed);
-    Serial.print(" mph");
-  }else{
-    Serial.print("INVALID");
-  }
-
-  Serial.print("   Heading: ");
-  if(gpsCourse!=NULL){
-    Serial.print(gpsCourse/100.0);
-    Serial.print(" degrees");
-  }else{
-    Serial.print("INVALID");
-  }
-
-  Serial.println();
-}
 
 
 

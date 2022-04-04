@@ -24,6 +24,18 @@ private:
     double accelerometer[3] = {0, 0, 0}; // x, y, z
     double brakePressure = 0;
     // TODO: orientation
+
+    //for GPS
+    double gpsLat;
+    double gpsLng;
+    double gpsSpeed;
+    int gpsSecond;
+    int gpsMinute;
+    int gpsHour;
+    int gpsDay;
+    int gpsMonth;
+    int gpsYear;
+    double gpsCourse;
     
 public:
     Vehicle(){ // Constructor
@@ -39,6 +51,8 @@ public:
     int GetTempAmb();
     int GetTempCVT();
     int GetRPM();
+    void GetGPSData();
+    void DisplayGPSOnSerial();
 //    void AppendChar(char* char1, char* char2, int l1, int l2);
     void Display();
 };
