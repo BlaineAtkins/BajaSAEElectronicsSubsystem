@@ -5,6 +5,8 @@
 #include <TinyGPS++.h> //DIFFERENT FROM TinyGPS! Forgot if this is from arduino library manager or github
 #include "Vehicle.h"
 
+
+
 //for ambient temp
 #include <OneWire.h> //download from https://github.com/PaulStoffregen/OneWire for teensy compatible
 #include <DallasTemperature.h> //download on step 3 from https://create.arduino.cc/projecthub/TheGadgetBoy/ds18b20-digital-temperature-sensor-and-arduino-9cc806
@@ -58,6 +60,11 @@ bool Vehicle::WriteToSD(){
     dataFile.print(",");
     dataFile.print(this->accelerometer[2]);
     dataFile.print("\n");
+
+
+    //DON'T FORGET TO INCLUDE
+    //-GPS date/time/heading etc
+    
     dataFile.close();
     return true;    
   }
@@ -169,8 +176,48 @@ void Vehicle::GetGPSData(){ //WARNING: if you only call this once per second, if
     }
     //Serial.println(gps.time.second());
     //Serial.print("Age of GPS data: ");
-    //Serial.println(gps.speed.age()); //not sure where/if this is useful yet...
-    
+    //Serial.println(gps.speed.age()); //not sure where/if this is useful yet...    
+}
+
+
+void Vehicle::Get9dofData(){
+  //IF ACCELERATION VALUES ARE RETURNING INF, SET THE SENSITIVITY LOWER, THERE SHOULD BE A FUNCTION TO DO THAT
+  //raw accelerometer (m/s/s)
+  imu::Vector<3> rawAccel = bno.getVector(Adafruit_BNO055::VECTOR_ACCELEROMETER);
+  this->rawAccelx=rawAccel.x();
+  this->rawAccely=rawAccel.y();
+  this->rawAccelz=rawAccel.z();
+ 
+  //Acceleration minus gravity (m/s/s)
+  imu::Vector<3> linAccel = bno.getVector(Adafruit_BNO055::VECTOR_LINEARACCEL);
+  this->linAccelx=linAccel.x();
+  this->linAccely=linAccel.y();
+  this->linAccelz=linAccel.z();
+
+  //gravity vector (m/s/s)
+  imu::Vector<3> gravity = bno.getVector(Adafruit_BNO055::VECTOR_GRAVITY);
+  this->gravityx=gravity.x();
+  this->gravityy=gravity.y();
+  this->gravityz=gravity.z();
+
+  //Orientation (degrees based on 360 degree sphere)
+  sensors_event_t event; 
+  bno.getEvent(&event);
+  this->orientationx=event.orientation.x;
+  this->orientationy=event.orientation.y;
+  this->orientationz=event.orientation.z;
+
+  //magnetometer (microtesla)
+  imu::Vector<3> mag = bno.getVector(Adafruit_BNO055::VECTOR_MAGNETOMETER);
+  this->magx=mag.x();
+  this->magy=mag.y();
+  this->magz=mag.z();
+
+  //gyroscope (rad/s)
+  imu::Vector<3> gyro = bno.getVector(Adafruit_BNO055::VECTOR_GYROSCOPE);
+  this->gyrox=gyro.x();
+  this->gyroy=gyro.y();
+  this->gyroz=gyro.z();
 }
 
 

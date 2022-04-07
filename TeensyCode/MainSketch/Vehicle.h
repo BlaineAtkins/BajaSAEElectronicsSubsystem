@@ -1,6 +1,11 @@
 #ifndef VEHICLE_H
 #define VEHICLE_H
 
+//for BNO055
+#include <Adafruit_Sensor.h>
+#include <Adafruit_BNO055.h>
+#include <utility/imumaths.h>
+
 /* TODO:
     -Confirm gps, accelerometer, brake pressure data types
     -Add orientation variable + related functions
@@ -36,12 +41,40 @@ private:
     int gpsMonth;
     int gpsYear;
     double gpsCourse;
+
+    //for 9dof
+    double rawAccelx;
+    double rawAccely;
+    double rawAccelz;
+    double linAccelx;
+    double linAccely;
+    double linAccelz;
+    double gravityx;
+    double gravityy;
+    double gravityz;
+    double orientationx;
+    double orientationy;
+    double orientationz;
+    double magx;
+    double magy;
+    double magz;
+    double gyrox;
+    double gyroy;
+    double gyroz;
     
 public:
     Vehicle(){ // Constructor
         this->BeginDisplay(); // Can't call GD.begin() from header >:(
+
+        if(!bno.begin()){
+          Serial.print("Could not detect BNO055 IMU. Please make sure it is plugged in to the main board");
+        }
+        bno.setExtCrystalUse(true);
     }
     ~Vehicle(){}; // Destructor
+
+    //IMU
+    Adafruit_BNO055 bno = Adafruit_BNO055(55);
 
     int speedMPH = 0;
 
@@ -53,6 +86,7 @@ public:
     int GetRPM();
     void GetGPSData();
     void DisplayGPSOnSerial();
+    void Get9dofData();
 //    void AppendChar(char* char1, char* char2, int l1, int l2);
     void Display();
 };

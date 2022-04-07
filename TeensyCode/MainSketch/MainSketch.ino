@@ -2,37 +2,14 @@
 //#include <SoftwareSerial.h> //also forget if this is from arduino library manager or github for 9dof
 #include <Wire.h>
 #include <SPI.h>
+//for BNO055
+#include <Adafruit_Sensor.h>
+#include <Adafruit_BNO055.h>
+#include <utility/imumaths.h>
 //#include <Adafruit_LSM9DS1.h> //installed from Arduino library manager, search for Adafruit LSM9DS1 and click yes to install dependancies
 //#include <Adafruit_Sensor.h>  // not used but required!
 #include "Vehicle.h"
 // NOTE: Display uses pins 8-13
-
-
-
-// TODO: Do these need to be global? My computer science teacher will inflict
-//       psychic damage to me from across campus if I use global variables
-//       when they could be local variables in a function (or a class)
-//Global Variables    set to NULL for invalid
-/*double gpsLat;
-double gpsLng;
-double gpsSpeed;
-int gpsSecond;
-int gpsMinute;
-int gpsHour;
-int gpsDay;
-int gpsMonth;
-int gpsYear;
-double gpsCourse;*/
-
-double ndofAccelX; // m/s^2
-double ndofAccelY; // m/s^2
-double ndofAccelZ; // m/s^2
-double ndofMagX;   // uT
-double ndofMagY;   // uT
-double ndofMagZ;   // uT
-double ndofGyroX;  // rad/s
-double ndofGyroY;  // rad/s
-double ndofGyroZ;  // rad/s
 
 //for hall effect spedometer
 int numMagnets=4;
@@ -42,24 +19,8 @@ unsigned long timerVehicleSpeed;
 int runningAvgHallSpedometer[4];
 
 
+
 float vehicleSpeedMPH=0;
-
-//for GPS serial data buffer
-//unsigned char serial5buffer[512*100]; //use 512 byte chunks (i think)
-
-// TODO: This probably shouldn't be global
-//for GPS
-//static const int gpsRXPin = 4, gpsTXPin = 3;
-//static const uint32_t GPSBaud = 9600; 
-//TinyGPSPlus gps; // The TinyGPS++ object
-//SoftwareSerial ss(gpsRXPin, gpsTXPin); // The serial connection to the GPS device
-
-// TODO: defines can go at the top, lsm probably shouldn't be global
-//for 9dof
-//Adafruit_LSM9DS1 lsm = Adafruit_LSM9DS1();
-//#define LSM9DS1_SCK A5
-//#define LSM9DS1_MOSI A4
-
 
 void setup() {
   
@@ -67,7 +28,6 @@ void setup() {
   Serial.begin(115200);
 
   Serial5.begin(9600); //initialize GPS hardware serial
-  //Serial5.addMemoryForRead(serial5buffer, sizeof(serial5buffer));
 
   //Hall Effect spedometer
   pinMode(2,INPUT); //for hall effect MPH sensor -- must be an interrupt capable pin.
@@ -75,20 +35,9 @@ void setup() {
 
   //CVT infrared sensor
   pinMode(41,INPUT);
-  
-/*
-  ss.begin(GPSBaud);
 
-  //9dof setup (accelerometer, magnetometer, gyroscope)
-  if (!lsm.begin()){ //if 9dof sensor is detected
-    Serial.println("Problem initializing LSM9DS1 9dof -- check wiring connections");
-  }
-  lsm.setupAccel(lsm.LSM9DS1_ACCELRANGE_2G); //Accelerometer range can be set range higher by changing 2G to 4G, 8G or 16G
-  lsm.setupMag(lsm.LSM9DS1_MAGGAIN_4GAUSS); //magnetometer sensitivity can be set higher with 8GAUSS 12GAUSS or 16GAUSS
-  lsm.setupGyro(lsm.LSM9DS1_GYROSCALE_245DPS); //Gyroscope can be changed to 500DPS or 2000DPS
-*/
-} 
-
+  //BNO055 IMU 9dof
+}
 void loop() {
   Vehicle Baja;
   
@@ -119,7 +68,8 @@ void loop() {
     
     Baja.GetGPSData(); //Call this as often as possible! See comment on the function in Vehicle.cpp
     //Baja.DisplayGPSOnSerial();
-   
+
+   Baja.Get9dofData();
     
   }
   exit(0);
