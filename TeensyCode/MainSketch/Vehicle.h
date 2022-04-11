@@ -25,10 +25,9 @@ private:
     int fuel = 100; // 0-100
     int runTime = 0;
     int startTime = 0;
-    double gpsPos[2] = {0, 0}; // x, y?
-    double accelerometer[3] = {0, 0, 0}; // x, y, z
+    //double gpsPos[2] = {0, 0}; // x, y?
+    //double accelerometer[3] = {0, 0, 0}; // x, y, z
     double brakePressure = 0;
-    // TODO: orientation
 
     //for GPS
     double gpsLat;
@@ -61,6 +60,10 @@ private:
     double gyrox;
     double gyroy;
     double gyroz;
+    int8_t boxTemp;
+
+    unsigned long cycleTimer=0;
+    int timePerCycle;
     
 public:
     Vehicle(){ // Constructor
@@ -87,6 +90,7 @@ public:
     void GetGPSData();
     void DisplayGPSOnSerial();
     void Get9dofData();
+    int GetCycleTime();
 //    void AppendChar(char* char1, char* char2, int l1, int l2);
     void Display();
 };

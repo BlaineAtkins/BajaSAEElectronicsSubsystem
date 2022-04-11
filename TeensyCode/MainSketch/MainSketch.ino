@@ -18,8 +18,6 @@ float driveshaftRatio=2; //ex: if driveshaft spins twice as fast as tires, drive
 unsigned long timerVehicleSpeed;
 int runningAvgHallSpedometer[4];
 
-
-
 float vehicleSpeedMPH=0;
 
 void setup() {
@@ -56,8 +54,7 @@ void loop() {
 
   while(1){
     Baja.Display();
-    delay(50);
-
+    delay(10);
     if(millis()-timerVehicleSpeed>1000){
       vehicleSpeedMPH=0;
     }
@@ -69,7 +66,11 @@ void loop() {
     Baja.GetGPSData(); //Call this as often as possible! See comment on the function in Vehicle.cpp
     //Baja.DisplayGPSOnSerial();
 
-   Baja.Get9dofData();
+    Baja.Get9dofData();
+
+    Baja.GetCycleTime();
+
+    Baja.WriteToSD();
     
   }
   exit(0);

@@ -18,17 +18,54 @@ DallasTemperature sensors(&oneWire);
 TinyGPSPlus gps;
 
 
-// Initialize display
+// Initialize display (and other things)
 void Vehicle::BeginDisplay(){
   Serial.println("If you get stuck here, the display is disconnected. Please connect display to boot.");
+  SD.begin(254);  
   GD.begin(0);
   //for ambient temperature
   sensors.begin();
   sensors.setWaitForConversion(false); //don't wait ~750 ms for temp to return new value
+
+  //Read in Fuel Level from last line of SD card this->fuel
+  String lastLines;
+  if(SD.exists("VehicleData.csv")){
+    File dataFile = SD.open("VehicleData.csv");
+    //File dataFile = SD.open("test.txt");
+    dataFile.seek(dataFile.size()-400); //go to near end of file so we don't read the entire file. Should subtract at least more than # of chars per line
+    while(dataFile.available()){
+      char c = dataFile.read();
+      if (isPrintable(c) || c=='\n'){
+        lastLines.concat(c);
+      }
+    }
+    String newLine = lastLines.substring(lastLines.indexOf('\n')); //note that this does not necessarily return the LAST line, just near to the last line. This doesn't matter sice lines are added every few dozen milliseconds, during which fuel level will not have changed appriciably
+    //Serial.println(newLine);
+    int startIndex;
+    int endIndex;
+    int currIndex=0;
+    for(int i=0;i<5;i++){
+      currIndex=newLine.indexOf(',',currIndex)+1;
+      if(i==3){
+        startIndex=currIndex;
+      }
+      if(i==4){
+        endIndex=currIndex-1;
+      }
+    }
+    //Serial.println(newLine.substring(startIndex,endIndex));
+    this->fuel = newLine.substring(startIndex,endIndex).toInt();
+  }else{
+    this->fuel=100;
+  }
 }
 
+int Vehicle::GetCycleTime(){
+  timePerCycle = millis()-(this->cycleTimer);
+  (this->cycleTimer)=millis();
+  return(timePerCycle);
+}
 
-// TODO: change to collect, store, and return speed
 int Vehicle::GetSpeedMPH(){
   return this->speedMPH;
 }
@@ -37,33 +74,93 @@ int Vehicle::GetSpeedMPH(){
 // TODO: include all data in write pass
 // Write all data to SD card with time stamp
 bool Vehicle::WriteToSD(){
-  SD.begin(254);
-  File dataFile = SD.open("VehicleData.txt", FILE_WRITE);
+
+  //if dataFile doesn't exist, write the header
+  if(!SD.exists("VehicleData.csv")){
+    File dataFile = SD.open("VehicleData.csv", FILE_WRITE);
+    dataFile.print("Runtime (s),Date (GPS),Time (GPS),Code loop time (ms),Fuel level (%),Engine RPM,Speed (MPH from driveshaft),Speed (MPH from GPS),Heading (deg from GPS),Latitude,Longitude,Ambient Temp (deg C),CVT belt temp (deg C),Electronics Box temp (deg C),X Acceleration (m/s^2),y Acceleration (m/s^2),z Acceleration (m/s^2),X Acceleration minus g (m/s^2),y Acceleration minus g (m/s^2),Z Acceleration minus g (m/s^2),X gravity vector (m/s^2),Y gravity vector (m/s^2),Z gravity vector (m/s^2),X Orientation (degrees),Y Orientation (degrees),Z Orientation (degrees),X magnetic field (uT),Y magnetic field (uT),Z magnetic field (uT),X angular velocity (m/s),Y angular velocity (m/s),Z angular velocity (m/s)");
+    dataFile.print("\n");
+    dataFile.close();
+  }
+  
+  File dataFile = SD.open("VehicleData.csv", FILE_WRITE);
   if(dataFile){ // 254==BUILTIN_SDCARD, set 
-    dataFile.print((int)(millis()/1000));
+    dataFile.print(millis()/1000.0); //WARNING: if you modify this, pleaes ensure fuel remains the 5th column, or modify the code that gets fuel level on startup
     dataFile.print(",");
-    dataFile.print(millis()/1000.0);
+    dataFile.print(gpsMonth);
+    dataFile.print("/");
+    dataFile.print(gpsDay);
+    dataFile.print("/");
+    dataFile.print(gpsYear);
     dataFile.print(",");
-    dataFile.print(this->fuel);
+    dataFile.print(gpsHour);
+    dataFile.print(":");
+    dataFile.print(gpsMinute);
+    dataFile.print(":");
+    dataFile.print(gpsSecond);
+    dataFile.print(",");
+    dataFile.print(timePerCycle);
+    dataFile.print(",");
+    dataFile.print(this->fuel); //WARNING: if you modify this, pleaes ensure fuel remains the 5th column, or modify the code that gets fuel level on startup
     dataFile.print(",");
     dataFile.print(this->rpm);
     dataFile.print(",");
     dataFile.print(this->speedMPH);
     dataFile.print(",");
+    dataFile.print(this->gpsSpeed);
+    dataFile.print(",");
+    dataFile.print(this->gpsCourse);
+    dataFile.print(",");
+    dataFile.print(this->gpsLat);
+    dataFile.print(",");
+    dataFile.print(this->gpsLng);
+    dataFile.print(",");
     dataFile.print(this->tempAmb);
     dataFile.print(",");
     dataFile.print(this->tempCVT);
     dataFile.print(",");
-    dataFile.print(this->accelerometer[0]);
+    dataFile.print(this->boxTemp);
     dataFile.print(",");
-    dataFile.print(this->accelerometer[1]);
+
+    //BELOW IS ALL FROM 9DOF
+
+    dataFile.print(this->rawAccelx);
     dataFile.print(",");
-    dataFile.print(this->accelerometer[2]);
-    dataFile.print("\n");
-
-
-    //DON'T FORGET TO INCLUDE
-    //-GPS date/time/heading etc
+    dataFile.print(this->rawAccely);
+    dataFile.print(",");
+    dataFile.print(this->rawAccelz);
+    dataFile.print(",");
+    dataFile.print(this->linAccelx);
+    dataFile.print(",");
+    dataFile.print(this->linAccely);
+    dataFile.print(",");
+    dataFile.print(this->linAccelz);
+    dataFile.print(",");
+    dataFile.print(this->gravityx);
+    dataFile.print(",");
+    dataFile.print(this->gravityy);
+    dataFile.print(",");
+    dataFile.print(this->gravityz);
+    dataFile.print(",");
+    dataFile.print(this->orientationx);
+    dataFile.print(",");
+    dataFile.print(this->orientationy);
+    dataFile.print(",");
+    dataFile.print(this->orientationz);
+    dataFile.print(",");
+    dataFile.print(this->magx);
+    dataFile.print(",");
+    dataFile.print(this->magy);
+    dataFile.print(",");
+    dataFile.print(this->magz);
+    dataFile.print(",");
+    dataFile.print(this->gyrox);
+    dataFile.print(",");
+    dataFile.print(this->gyroy);
+    dataFile.print(",");
+    dataFile.print(this->gyroz);
+    
+    dataFile.print("\n"); 
     
     dataFile.close();
     return true;    
@@ -218,6 +315,9 @@ void Vehicle::Get9dofData(){
   this->gyrox=gyro.x();
   this->gyroy=gyro.y();
   this->gyroz=gyro.z();
+
+  //temp
+  boxTemp = bno.getTemp();
 }
 
 
