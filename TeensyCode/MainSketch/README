@@ -1,0 +1,3 @@
+LIBRARY CHANGES:
+In the RF24 library, in /utility/Teensy/RF24_arch_config.h change SPI to SPI1
+In the RF24 library, in RF24.cpp change SPI_CLOCK_DIV2 to SPI_CLOCK_DIV4 to work with long range NRF24 radios (high capacitance in our boards means clock needs slowed down)
