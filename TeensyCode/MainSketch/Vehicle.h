@@ -91,6 +91,7 @@ public:
     void DisplayGPSOnSerial();
     void Get9dofData();
     int GetCycleTime();
+    void WriteToRadio();
 //    void AppendChar(char* char1, char* char2, int l1, int l2);
     void Display();
 };

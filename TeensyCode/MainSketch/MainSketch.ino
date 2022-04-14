@@ -71,6 +71,8 @@ void loop() {
     Baja.GetCycleTime();
 
     Baja.WriteToSD();
+
+    Baja.WriteToRadio(); //TODO: see what happens if radio is disconnected. Does it take longer?
     
   }
   exit(0);

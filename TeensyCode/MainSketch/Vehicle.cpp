@@ -4,7 +4,7 @@
 #include <SD.h>
 #include <TinyGPS++.h> //DIFFERENT FROM TinyGPS! Forgot if this is from arduino library manager or github
 #include "Vehicle.h"
-
+#include <RF24.h>
 
 
 //for ambient temp
@@ -17,6 +17,10 @@ DallasTemperature sensors(&oneWire);
 //for GPS
 TinyGPSPlus gps;
 
+//for radio comms
+RF24 radio(38,0); //ce, csn -- MAKE SURE TO CHANGE SPI TO SPI1 in library /utility/Teensy/RF24_arch_config.h
+byte address[6]="2Node";
+bool radioDetected=0;
 
 // Initialize display (and other things)
 void Vehicle::BeginDisplay(){
@@ -58,12 +62,38 @@ void Vehicle::BeginDisplay(){
   }else{
     this->fuel=100;
   }
+
+  //for radio
+  if(radio.begin()){
+    Serial.println("NRF24 radio present");
+    radioDetected=1;
+  }else{
+    Serial.println("ERROR: Failed to detect NRF24 radio");
+  }
+  radio.openWritingPipe(address);
+  radio.stopListening(); //don't listen for anything, we are only sending
+  radio.setAutoAck(false); //just send, don't worry about success
+  radio.setDataRate(RF24_250KBPS); //lowest data rate to maximize range
+  
+}
+
+void Vehicle::WriteToRadio(){
+  if(radioDetected){ //don't waste time timing out if we already know the radio isn't connected
+    char buf[32];
+    char sendText[32];
+    itoa(timePerCycle,buf,10);
+    strcpy(sendText,buf);
+    //put another variable in buf, then append it with below. Decide on pre-text and deliniators
+    //strcat(sendText,buf);
+
+    radio.write(&sendText,strlen(sendText));
+  }
 }
 
 int Vehicle::GetCycleTime(){
-  timePerCycle = millis()-(this->cycleTimer);
+  this->timePerCycle = millis()-(this->cycleTimer);
   (this->cycleTimer)=millis();
-  return(timePerCycle);
+  return(this->timePerCycle);
 }
 
 int Vehicle::GetSpeedMPH(){
