@@ -72,7 +72,7 @@ void loop() {
 
     Baja.WriteToSD();
 
-    Baja.WriteToRadio(); //TODO: see what happens if radio is disconnected. Does it take longer?
+    Baja.WriteToRadio(); 
     
   }
   exit(0);

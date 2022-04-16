@@ -81,12 +81,206 @@ void Vehicle::WriteToRadio(){
   if(radioDetected){ //don't waste time timing out if we already know the radio isn't connected
     char buf[32];
     char sendText[32];
-    itoa(timePerCycle,buf,10);
+    //itoa(timePerCycle,buf,10);
+    sprintf(buf,"a"); //pretext: 1 char
     strcpy(sendText,buf);
-    //put another variable in buf, then append it with below. Decide on pre-text and deliniators
-    //strcat(sendText,buf);
+    sprintf(buf,"%.7d",millis()/1000); //runtime: 7 chars
+    strcat(sendText,buf);
 
+    //GPS date, 10 chars
+    sprintf(buf,"%.2d/%.2d/%.4d",gpsMonth,gpsDay,gpsYear);
+    strcat(sendText,buf);
+
+    //GPS time, 8 chars
+    sprintf(buf,"%.2d:%.2d:%.2d",gpsHour,gpsMinute,gpsSecond);
+    strcat(sendText,buf);
+
+    //code loop time, 4 chars (because on boot the first loop can take multiple seconds)
+    sprintf(buf,"%.4d",timePerCycle);
+    strcat(sendText,buf);
+
+    //FIRST CHUNK FULL
     radio.write(&sendText,strlen(sendText));
+    //reset char arrays
+    memset(&buf[0],0,sizeof(buf));
+    memset(&sendText[0],0,sizeof(sendText));
+
+
+    sprintf(buf,"b"); //pretext: 1 char
+    strcpy(sendText,buf);
+
+    //Fuel level, 3 chars
+    sprintf(buf,"%.3d",this->fuel);
+    strcat(sendText,buf);
+
+    //RPM, 4 chars
+    sprintf(buf,"%.4d",this->rpm);
+    strcat(sendText,buf);
+
+    //speed from driveshaft, 5 chars
+    dtostrf(speedMPH,5,2,buf); //value, min field width, # decimals, storage
+    strcat(sendText,buf);
+
+    //speed from GPS, 5 chars
+    dtostrf(gpsSpeed,5,2,buf); //value, min field width, # decimals, storage
+    strcat(sendText,buf);
+
+    //gps heading, 6 chars
+    dtostrf((this->gpsCourse/100.0),6,2,buf);
+    strcat(sendText,buf);
+
+    //SECOND CHUNK FULL
+    radio.write(&sendText,strlen(sendText));
+    //reset char arrays
+    memset(&buf[0],0,sizeof(buf));
+    memset(&sendText[0],0,sizeof(sendText));
+
+    sprintf(buf,"c"); //pretext: 1 char
+    strcpy(sendText,buf);
+    
+    //latitude
+    sprintf(buf,"%lf",this->gpsLat);
+    strcat(sendText,buf);
+
+    sprintf(buf,",");
+    strcat(sendText,buf);
+    //longitude
+    sprintf(buf,"%lf",this->gpsLng);
+    strcat(sendText,buf);
+
+    //THIRD CHUNK DONE BECAUSE LAT/LNG ARE VARIABLE LENGTHS
+    radio.write(&sendText,strlen(sendText));
+    //reset char arrays
+    memset(&buf[0],0,sizeof(buf));
+    memset(&sendText[0],0,sizeof(sendText));
+
+    sprintf(buf,"d"); //pretext: 1 char
+    strcpy(sendText,buf);
+
+    //ambient temp, 7 chars (when floating, value can be in the negative hundreds, and that shouldn't break it)
+    dtostrf(gpsSpeed,7,2,buf); //value, min field width, # decimals, storage
+    strcat(sendText,buf);
+
+    //cvt belt temp, 3 chars
+    sprintf(buf,"%.3d",this->tempCVT);
+    strcat(sendText,buf);
+
+    //electronics box temp, 2 chars   (this breaks deliniation when negative. ex, -4 becomes -04)
+    sprintf(buf,"%.2d",this->boxTemp);
+    strcat(sendText,buf);
+
+    //raw x accel, 6 chars
+    dtostrf(rawAccelx,6,2,buf); //value, min field width, # decimals, storage
+    strcat(sendText,buf);
+
+    //raw y accel, 6 chars
+    dtostrf(rawAccely,6,2,buf); //value, min field width, # decimals, storage
+    strcat(sendText,buf);
+
+    //raw z accel, 6 chars
+    dtostrf(rawAccelz,6,2,buf); //value, min field width, # decimals, storage
+    strcat(sendText,buf);
+    
+    //FOURTH CHUNK FULL
+    radio.write(&sendText,strlen(sendText));
+    //reset char arrays
+    memset(&buf[0],0,sizeof(buf));
+    memset(&sendText[0],0,sizeof(sendText));
+
+    sprintf(buf,"e"); //pretext: 1 char
+    strcpy(sendText,buf);
+
+    //x accel minus g, 6 chars
+    dtostrf(linAccelx,6,2,buf); //value, min field width, # decimals, storage
+    strcat(sendText,buf);
+
+    //y accel minus g, 6 chars
+    dtostrf(linAccelx,6,2,buf); //value, min field width, # decimals, storage
+    strcat(sendText,buf);
+
+    //z accel minus g, 6 chars
+    dtostrf(linAccelx,6,2,buf); //value, min field width, # decimals, storage
+    strcat(sendText,buf);
+
+    //x gravity vector, 6 chars
+    dtostrf(gravityx,6,2,buf); //value, min field width, # decimals, storage
+    strcat(sendText,buf);
+
+    //y gravity vector, 6 chars
+    dtostrf(gravityy,6,2,buf); //value, min field width, # decimals, storage
+    strcat(sendText,buf);
+
+    //FIFTH CHUNK FULL
+    radio.write(&sendText,strlen(sendText));
+    //reset char arrays
+    memset(&buf[0],0,sizeof(buf));
+    memset(&sendText[0],0,sizeof(sendText));
+
+    sprintf(buf,"f"); //pretext: 1 char
+    strcpy(sendText,buf);
+
+    //z gravity vector, 6 chars
+    dtostrf(gravityz,6,2,buf); //value, min field width, # decimals, storage
+    strcat(sendText,buf);
+
+    //x orientation, 6 chars
+    dtostrf(orientationx,6,2,buf); //value, min field width, # decimals, storage
+    strcat(sendText,buf);
+
+    //y orientation, 6 chars
+    dtostrf(orientationy,6,2,buf); //value, min field width, # decimals, storage
+    strcat(sendText,buf);
+
+    //z orientation, 6 chars
+    dtostrf(orientationz,6,2,buf); //value, min field width, # decimals, storage
+    strcat(sendText,buf);
+
+
+    //SIXTH CHUNK FULL
+    radio.write(&sendText,strlen(sendText));
+    //reset char arrays
+    memset(&buf[0],0,sizeof(buf));
+    memset(&sendText[0],0,sizeof(sendText));
+
+    sprintf(buf,"g"); //pretext: 1 char
+    strcpy(sendText,buf);
+
+    //magnetic x, 8 chars (max sensor value is -2048.00 uT, which is possible if it is next to a magnet)
+    dtostrf(magx,8,2,buf); //value, min field width, # decimals, storage
+    strcat(sendText,buf);
+
+    //magnetic y, 8 chars (max sensor value is -2048.00 uT, which is possible if it is next to a magnet)
+    dtostrf(magy,8,2,buf); //value, min field width, # decimals, storage
+    strcat(sendText,buf);
+
+    //magnetic z, 8 chars (max sensor value is -2048.00 uT, which is possible if it is next to a magnet)
+    dtostrf(magz,8,2,buf); //value, min field width, # decimals, storage
+    strcat(sendText,buf);
+
+    //gyro x, 7 chars (can conciveably be in the negative hundreds
+    dtostrf(gyrox,7,2,buf); //value, min field width, # decimals, storage
+    strcat(sendText,buf);
+
+
+    //SEVENTH CHUNK FULL
+    radio.write(&sendText,strlen(sendText));
+    //reset char arrays
+    memset(&buf[0],0,sizeof(buf));
+    memset(&sendText[0],0,sizeof(sendText));
+
+    sprintf(buf,"h"); //pretext: 1 char
+    strcpy(sendText,buf);
+
+    //gyro y, 7 chars (can conciveably be in the negative hundreds
+    dtostrf(gyroy,7,2,buf); //value, min field width, # decimals, storage
+    strcat(sendText,buf);
+
+    //gyro z, 7 chars (can conciveably be in the negative hundreds
+    dtostrf(gyroz,7,2,buf); //value, min field width, # decimals, storage
+    strcat(sendText,buf);
+    
+    radio.write(&sendText,strlen(sendText));
+    
   }
 }
 
