@@ -38,16 +38,39 @@ char rawAccely[7];
 char rawAccelz[7];
 
 unsigned long lastTimeReceivedE=0;
-unsigned long ageE;
+unsigned long ageE=0;
 char linAccelx[7];
 char linAccely[7];
 char linAccelz[7];
 char gravityx[7];
 char gravityy[7];
 
+unsigned long lastTimeReceivedF=0;
+unsigned long ageF=0;
+char gravityz[7];
+char orientationx[7];
+char orientationy[7];
+char orientationz[7];
+
+unsigned long lastTimeReceivedG=0;
+unsigned long ageG=0;
+char magx[9];
+char magy[9];
+char magz[9];
+char gyrox[8];
+
+unsigned long lastTimeReceivedH=0;
+unsigned long ageH;
+char gyroy[8];
+char gyroz[8];
+
 void setup() {
   Serial.begin(115200);
-  Serial.println(radio.begin());
+  if(radio.begin()){
+    Serial.println("Radio initialized - ready to receive data...");
+  }else{
+    Serial.println("RADIO NOT DETECTED. Please check wiring.");
+  }
   delay(1000);
   radio.openReadingPipe(0, address);
   radio.setPALevel(RF24_PA_MAX);
@@ -59,13 +82,63 @@ void setup() {
 }
 
 void loop() {
+  getData();
+  getAgeOfData();
+  displayData();
+
+
+}
+
+void displayData(){
+  printWithDeliniator(runtime);
+  printWithDeliniator(gpsDate);
+  printWithDeliniator(gpsTime);
+  printWithDeliniator(timePerCycle);
+  printWithDeliniator(fuel);
+  printWithDeliniator(rpm);
+  printWithDeliniator(driveshaftSpeed);
+  printWithDeliniator(gpsSpeed);
+  printWithDeliniator(gpsHeading);
+  printWithDeliniator(lat);
+  printWithDeliniator(lng);
+  printWithDeliniator(tempAmbient);
+  printWithDeliniator(tempCVT);
+  printWithDeliniator(tempBox);
+  printWithDeliniator(rawAccelx);
+  printWithDeliniator(rawAccely);
+  printWithDeliniator(rawAccelz);
+  printWithDeliniator(linAccelx);
+  printWithDeliniator(linAccely);
+  printWithDeliniator(linAccelz);
+  printWithDeliniator(gravityx);
+  printWithDeliniator(gravityy);
+  printWithDeliniator(gravityz);
+  printWithDeliniator(orientationx);
+  printWithDeliniator(orientationy);
+  printWithDeliniator(orientationz);
+
+  Serial.println();
+}
+
+void printWithDeliniator(char *toPrint){
+  char deliniator[5]="  ";
+  Serial.print(toPrint);
+  Serial.print(deliniator);
+}
+
+void getAgeOfData(){
   //update how old data is
   ageA=millis()-lastTimeReceivedA;
   ageB=millis()-lastTimeReceivedB;
   ageC=millis()-lastTimeReceivedC;
   ageD=millis()-lastTimeReceivedD;
   ageE=millis()-lastTimeReceivedE;
-  
+  ageF=millis()-lastTimeReceivedF;
+  ageG=millis()-lastTimeReceivedG;
+  ageH=millis()-lastTimeReceivedH;
+}
+
+void getData(){
   if (radio.available()){
     char text[32] = "";
     radio.read(&text, sizeof(text));
@@ -117,8 +190,31 @@ void loop() {
     }
     if(text[0]=='e'){
       lastTimeReceivedE=millis();
+      copySubstring(text,linAccelx,1,7);
+      copySubstring(text,linAccely,7,13);
+      copySubstring(text,linAccelz,13,19);
+      copySubstring(text,gravityx,19,25);
+      copySubstring(text,gravityy,25,31);
     }
-    
+    if(text[0]=='f'){
+      lastTimeReceivedF=millis();
+      copySubstring(text,gravityz,1,7);
+      copySubstring(text,orientationx,7,13);
+      copySubstring(text,orientationy,13,19);
+      copySubstring(text,orientationz,19,25);
+    }
+    if(text[0]=='g'){
+      lastTimeReceivedG=millis();
+      copySubstring(text,magx,1,9);
+      copySubstring(text,magy,9,17);
+      copySubstring(text,magz,17,25);
+      copySubstring(text,gyrox,25,32);
+    }
+    if(text[0]=='h'){
+      lastTimeReceivedH=millis();
+      copySubstring(text,gyroy,1,8);
+      copySubstring(text,gyroz,8,15);
+    }
   }
 }
 
