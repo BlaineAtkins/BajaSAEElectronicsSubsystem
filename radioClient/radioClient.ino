@@ -8,28 +8,24 @@ RF24 radio(7,8); //CE, CSN
 
 const byte address[6] = "2Node";
 
-unsigned long lastTimeReceivedA=0;
-unsigned long ageA=0;
+//A block
 char runtime[8];
 char gpsDate[11];
 char gpsTime[9];
 char timePerCycle[5];
 
-unsigned long lastTimeReceivedB=0;
-unsigned long ageB=0;
+//B block
 char fuel[4];
 char rpm[5];
 char driveshaftSpeed[6];
 char gpsSpeed[6];
 char gpsHeading[7];
 
-unsigned long lastTimeReceivedC=0;
-unsigned long ageC=0;
+//C block
 char lat[15];
 char lng[15];
 
-unsigned long lastTimeReceivedD=0;
-unsigned long ageD=0;
+//D block
 char tempAmbient[8];
 char tempCVT[4];
 char tempBox[3];
@@ -37,32 +33,36 @@ char rawAccelx[7];
 char rawAccely[7];
 char rawAccelz[7];
 
-unsigned long lastTimeReceivedE=0;
-unsigned long ageE=0;
+//E block
 char linAccelx[7];
 char linAccely[7];
 char linAccelz[7];
 char gravityx[7];
 char gravityy[7];
 
-unsigned long lastTimeReceivedF=0;
-unsigned long ageF=0;
+//F block
 char gravityz[7];
 char orientationx[7];
 char orientationy[7];
 char orientationz[7];
 
-unsigned long lastTimeReceivedG=0;
-unsigned long ageG=0;
+//G block
 char magx[9];
 char magy[9];
 char magz[9];
 char gyrox[8];
 
-unsigned long lastTimeReceivedH=0;
-unsigned long ageH;
+//H block
 char gyroy[8];
 char gyroz[8];
+
+unsigned long ageNewestData=0;
+unsigned long ageOldestData=0;
+unsigned long lastTimeDisplayedData=0;
+
+const int numBlocks=8;
+unsigned long lastTimeReceived[numBlocks];
+unsigned long age[numBlocks];
 
 void setup() {
   Serial.begin(115200);
@@ -84,7 +84,9 @@ void setup() {
 void loop() {
   getData();
   getAgeOfData();
-  displayData();
+  if(ageNewestData<(millis()-lastTimeDisplayedData)){ //only print another line if we've received new data since then
+    displayData();
+  }
 
 
 }
@@ -115,9 +117,14 @@ void displayData(){
   printWithDeliniator(gravityz);
   printWithDeliniator(orientationx);
   printWithDeliniator(orientationy);
-  printWithDeliniator(orientationz);
+  Serial.print(orientationz);
+
+  if(ageOldestData>1000){ //notify user that some data is outdated
+    Serial.print("\t!!");
+  }
 
   Serial.println();
+  lastTimeDisplayedData=millis();
 }
 
 void printWithDeliniator(char *toPrint){
@@ -128,14 +135,23 @@ void printWithDeliniator(char *toPrint){
 
 void getAgeOfData(){
   //update how old data is
-  ageA=millis()-lastTimeReceivedA;
-  ageB=millis()-lastTimeReceivedB;
-  ageC=millis()-lastTimeReceivedC;
-  ageD=millis()-lastTimeReceivedD;
-  ageE=millis()-lastTimeReceivedE;
-  ageF=millis()-lastTimeReceivedF;
-  ageG=millis()-lastTimeReceivedG;
-  ageH=millis()-lastTimeReceivedH;
+  for(int i=0;i<numBlocks;i++){
+    age[i]=millis()-lastTimeReceived[i];
+  }
+
+  ageOldestData = 0;
+  for(int i=0;i<numBlocks;i++){
+    if(age[i]>ageOldestData){
+      ageOldestData=age[i];
+    }
+  }
+  ageNewestData = age[0];
+  for(int i=0;i<numBlocks;i++){
+    if(age[i]<ageNewestData){
+      ageNewestData=age[i];
+    }
+  }
+  
 }
 
 void getData(){
@@ -145,7 +161,7 @@ void getData(){
     //Serial.println(text);
     
     if(text[0]=='a'){
-      lastTimeReceivedA=millis();
+      lastTimeReceived[0]=millis();
       copySubstring(text,runtime,1,8);
       copySubstring(text,gpsDate,8,18);
       copySubstring(text,gpsTime,18,26);
@@ -153,7 +169,7 @@ void getData(){
     }
         
     if(text[0]=='b'){
-      lastTimeReceivedB=millis();
+      lastTimeReceived[1]=millis();
       copySubstring(text,fuel,1,4);
       copySubstring(text,rpm,4,8);
       copySubstring(text,driveshaftSpeed,8,13);
@@ -161,7 +177,7 @@ void getData(){
       copySubstring(text,gpsHeading,18,24);             
     }
     if(text[0]=='c'){
-      lastTimeReceivedC=millis();
+      lastTimeReceived[2]=millis();
       int commaIndex=0;
       for(int i=0;i<sizeof(text);i++){
         if(text[i]==','){
@@ -180,7 +196,7 @@ void getData(){
       copySubstring(text,lng,commaIndex+1,stringEnd);
     }
     if(text[0]=='d'){
-      lastTimeReceivedD=millis();
+      lastTimeReceived[3]=millis();
       copySubstring(text,tempAmbient,1,8);
       copySubstring(text,tempCVT,9,11);
       copySubstring(text,tempBox,11,13);
@@ -189,7 +205,7 @@ void getData(){
       copySubstring(text,rawAccelz,25,31);
     }
     if(text[0]=='e'){
-      lastTimeReceivedE=millis();
+      lastTimeReceived[4]=millis();
       copySubstring(text,linAccelx,1,7);
       copySubstring(text,linAccely,7,13);
       copySubstring(text,linAccelz,13,19);
@@ -197,21 +213,21 @@ void getData(){
       copySubstring(text,gravityy,25,31);
     }
     if(text[0]=='f'){
-      lastTimeReceivedF=millis();
+      lastTimeReceived[5]=millis();
       copySubstring(text,gravityz,1,7);
       copySubstring(text,orientationx,7,13);
       copySubstring(text,orientationy,13,19);
       copySubstring(text,orientationz,19,25);
     }
     if(text[0]=='g'){
-      lastTimeReceivedG=millis();
+      lastTimeReceived[6]=millis();
       copySubstring(text,magx,1,9);
       copySubstring(text,magy,9,17);
       copySubstring(text,magz,17,25);
       copySubstring(text,gyrox,25,32);
     }
     if(text[0]=='h'){
-      lastTimeReceivedH=millis();
+      lastTimeReceived[7]=millis();
       copySubstring(text,gyroy,1,8);
       copySubstring(text,gyroz,8,15);
     }
