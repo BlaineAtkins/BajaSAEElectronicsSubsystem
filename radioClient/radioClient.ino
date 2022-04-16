@@ -64,6 +64,18 @@ const int numBlocks=8;
 unsigned long lastTimeReceived[numBlocks];
 unsigned long age[numBlocks];
 
+//FOR PLOTTING GPS POSITION VS SIGNAL STRENGTH
+#include <TinyGPS++.h>
+#include <SoftwareSerial.h>
+static const int RXPin=4, TXPin=3;
+static const uint32_t GPSBaud = 9600;
+TinyGPSPlus gps;
+SoftwareSerial ss(RXPin,TXPin);
+int samplesInLastPeriod=0; //currently, one period is ~2 seconds (every other GPS receipt)
+int period=1000; //time period in which to sample received packets
+unsigned long lastCountReset=0;
+
+
 void setup() {
   Serial.begin(115200);
   if(radio.begin()){
@@ -77,8 +89,12 @@ void setup() {
   radio.startListening();
 
   radio.setAutoAck(false);
-
   radio.setDataRate(RF24_250KBPS);
+
+  pinMode(2,OUTPUT);
+
+  //FOR PLOTTING GPS POSITION VS SIGNAL STRENGTH
+  ss.begin(GPSBaud);
 }
 
 void loop() {
@@ -87,8 +103,35 @@ void loop() {
   if(ageNewestData<(millis()-lastTimeDisplayedData)){ //only print another line if we've received new data since then
     displayData();
   }
+  statusLED();
+
+  //printGPS();
 
 
+}
+
+void printGPS(){
+  while (ss.available() > 0)
+    gps.encode(ss.read());
+    
+    if(millis()-lastCountReset>period){
+    Serial.print(gps.location.lat(), 6);
+    Serial.print(",");
+    Serial.print(gps.location.lng(), 6);
+    Serial.print(",");
+    Serial.println(samplesInLastPeriod);
+    samplesInLastPeriod=0;
+    lastCountReset=millis();
+  }
+}
+
+void statusLED(){
+  if(ageNewestData<40){
+    digitalWrite(2,HIGH);
+  }else{
+    digitalWrite(2,LOW);
+  }
+    
 }
 
 void displayData(){
@@ -119,8 +162,8 @@ void displayData(){
   printWithDeliniator(orientationy);
   Serial.print(orientationz);
 
-  if(ageOldestData>1000){ //notify user that some data is outdated
-    Serial.print("\t!!");
+  if(ageOldestData>2000){ //notify user that some data is outdated
+    Serial.print("\t!");
   }
 
   Serial.println();
@@ -145,6 +188,7 @@ void getAgeOfData(){
       ageOldestData=age[i];
     }
   }
+  //Serial.println(ageOldestData);
   ageNewestData = age[0];
   for(int i=0;i<numBlocks;i++){
     if(age[i]<ageNewestData){
@@ -159,6 +203,9 @@ void getData(){
     char text[32] = "";
     radio.read(&text, sizeof(text));
     //Serial.println(text);
+
+    //FOR GPS LOGGING
+    samplesInLastPeriod++;
     
     if(text[0]=='a'){
       lastTimeReceived[0]=millis();
