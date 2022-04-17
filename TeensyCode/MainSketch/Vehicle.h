@@ -79,7 +79,7 @@ public:
     //IMU
     Adafruit_BNO055 bno = Adafruit_BNO055(55);
 
-    int speedMPH = 0;
+    float speedMPH = 0;
 
     bool WriteToSD();
     int GetSpeedMPH();

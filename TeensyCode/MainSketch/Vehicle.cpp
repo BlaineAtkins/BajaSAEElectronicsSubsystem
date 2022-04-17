@@ -79,8 +79,8 @@ void Vehicle::BeginDisplay(){
 
 void Vehicle::WriteToRadio(){
   if(radioDetected){ //don't waste time timing out if we already know the radio isn't connected
-    char buf[32];
-    char sendText[32];
+    char buf[33];
+    char sendText[33];
     //itoa(timePerCycle,buf,10);
     sprintf(buf,"a"); //pretext: 1 char
     strcpy(sendText,buf);
@@ -280,7 +280,7 @@ void Vehicle::WriteToRadio(){
     strcat(sendText,buf);
     
     radio.write(&sendText,strlen(sendText));
-    
+   
   }
 }
 
@@ -635,6 +635,7 @@ void Vehicle::Display(){
 
   // Display vehicle speed
   String speedString = (String)this->speedMPH;
+  speedString.remove(speedString.length()-1);
   char speedChar[10];
   speedString.toCharArray(speedChar, 10);
   GD.cmd_gauge(GD.w-170, GD.h/2+50, 200, OPT_NOBACK, 5, 10, this->speedMPH, 40);

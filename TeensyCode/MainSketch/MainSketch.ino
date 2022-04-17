@@ -14,11 +14,11 @@
 //for hall effect spedometer
 int numMagnets=4;
 float tireDiameter=0.6604;
-float driveshaftRatio=2; //ex: if driveshaft spins twice as fast as tires, driveshaftRatio=2
-unsigned long timerVehicleSpeed;
-int runningAvgHallSpedometer[4];
+float driveshaftRatio=3; //ex: if driveshaft spins twice as fast as tires, driveshaftRatio=2
+volatile unsigned long timerVehicleSpeed;
+volatile int runningAvgHallSpedometer[4];
 
-float vehicleSpeedMPH=0;
+volatile float vehicleSpeedMPH=0;
 
 void setup() {
   
@@ -53,13 +53,15 @@ void loop() {
 */
 
   while(1){
+    
     Baja.Display();
     delay(10);
     if(millis()-timerVehicleSpeed>1000){
       vehicleSpeedMPH=0;
     }
+    
     Baja.speedMPH=vehicleSpeedMPH; //vehicleSpeedMPH is a global variable set by InterruptMagSpeedTransition()
-
+    
     Baja.GetTempAmb();
     Baja.GetTempCVT();
     
@@ -71,14 +73,13 @@ void loop() {
     Baja.GetCycleTime();
 
     Baja.WriteToSD();
-
     Baja.WriteToRadio(); 
-    
   }
   exit(0);
 }
 
 void InterruptMagSpeedTransition(){
+  
   float rpm;
   float hz;
   float vehicleSpeedMetersPS;
@@ -103,13 +104,14 @@ void InterruptMagSpeedTransition(){
   hz = 1.0/(((elapsedTimeVehicleSpeed/1000.0)*numMagnets)); 
 
   rpm = hz*60;
-  Serial.println(rpm);
+  //Serial.println(rpm);
 
   float pointDistance = (PI*tireDiameter)/numMagnets; //distance between two adjacent magnets, scaled to distance on tire
   vehicleSpeedMetersPS = pointDistance/(elapsedTimeVehicleSpeed/1000.0); // m/s
   vehicleSpeedMPH = vehicleSpeedMetersPS*(1/1609.34)*(3600/1);      //*(miles/meter)*(seconds/hour)
   vehicleSpeedMetersPS=vehicleSpeedMetersPS/driveshaftRatio;
   vehicleSpeedMPH=vehicleSpeedMPH/driveshaftRatio;
+  //Serial.println(vehicleSpeedMPH);
 }
 
 
