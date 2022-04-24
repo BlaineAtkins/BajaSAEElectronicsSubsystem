@@ -575,6 +575,7 @@ int Vehicle::GetTempCVT(){
 
 // Collects, updates, and returns engine RPM
 // TODO: Get engine rpm
+//this should be irrelevant now that we're using interrupts, but leaving it just in case
 int Vehicle::GetRPM(){
   return this->rpm;
 }
@@ -625,7 +626,7 @@ void Vehicle::Display(){
 
   // Display engine RPM
   int deleteThis = this->rpm;
-  deleteThis = deleteThis + rand()%25 - rand()%25;
+  //deleteThis = deleteThis + rand()%25 - rand()%25;
   String rpmString = (String)deleteThis;
   char rpmChar[10];
   rpmString.toCharArray(rpmChar, 10);

@@ -17,8 +17,13 @@ float tireDiameter=0.6604;
 float driveshaftRatio=3; //ex: if driveshaft spins twice as fast as tires, driveshaftRatio=2
 volatile unsigned long timerVehicleSpeed;
 volatile int runningAvgHallSpedometer[4];
-
 volatile float vehicleSpeedMPH=0;
+
+//for induction pickup RPM
+volatile unsigned long timerSparkPlug;
+volatile int runningAvgSparkPlug[4];
+volatile float engineRPM=0;
+
 
 void setup() {
   
@@ -31,27 +36,17 @@ void setup() {
   pinMode(2,INPUT); //for hall effect MPH sensor -- must be an interrupt capable pin.
   attachInterrupt(digitalPinToInterrupt(2), InterruptMagSpeedTransition, CHANGE); //set ISR for hall effect sensor
 
+  //Induction Pickup RPM
+  pinMode(7,INPUT);
+  attachInterrupt(digitalPinToInterrupt(7), InterruptSparkPlugFire, RISING);
+
   //CVT infrared sensor
   pinMode(41,INPUT);
 
-  //BNO055 IMU 9dof
 }
 void loop() {
   Vehicle Baja;
   
-/* GPS setup to be parsed by Blaine
-  if (ss.available()>0 && gps.encode(ss.read())){ //if we're getting GPS data
-    handleGPS();
-    //if statement does not fire if we're doing too much outside of this... (ex, calling handle9dof() or display___onSerial() in the main loop). ...Is that because serial data from GPS needs to be received synchronously? Sounds like software serial is generally inferior to hardware serial. I think we can shift this to hardware serial with Teensy 4.1 see https://www.pjrc.com/teensy/td_uart.html
-    displayGPSOnSerial();
-  }
-  //handle9dof();
-  //display9dofOnSerial();
-  displayToLCD();
-  writeToSDCard();
-  transmitToRadio();
-*/
-
   while(1){
     
     Baja.Display();
@@ -59,8 +54,12 @@ void loop() {
     if(millis()-timerVehicleSpeed>1000){
       vehicleSpeedMPH=0;
     }
+    if(millis()-timerSparkPlug>100){ //we expect spark plug fires a maximum of 40 ms apart
+      engineRPM=0;
+    }
     
     Baja.speedMPH=vehicleSpeedMPH; //vehicleSpeedMPH is a global variable set by InterruptMagSpeedTransition()
+    Baja.rpm=engineRPM;
     
     Baja.GetTempAmb();
     Baja.GetTempCVT();
@@ -74,6 +73,8 @@ void loop() {
 
     Baja.WriteToSD();
     Baja.WriteToRadio(); 
+
+    
   }
   exit(0);
 }
@@ -115,102 +116,28 @@ void InterruptMagSpeedTransition(){
 }
 
 
-/*
-void displayToLCD(){
-  bool validSpeed=true;
-  if(gpsSpeed==NULL || gps.speed.age()>2000){ //if we didn't get a valid speed or the speed data was collected over 2 seconds ago
-    validSpeed=false; //display -- or something instead of speed
-  }
-}
-
-
-
-void transmitToRadio(){
-  //test what happens when you attempt to transmit NULL
-}
-
-
-
-void display9dofOnSerial(){
-  Serial.print("Accel X: "); Serial.print(ndofAccelX); Serial.print(" m/s^2");
-  Serial.print("  Y: "); Serial.print(ndofAccelY);     Serial.print(" m/s^2 ");
-  Serial.print("  Z: "); Serial.print(ndofAccelZ);     Serial.print(" m/s^2 ");
-  Serial.print("\t");
-  Serial.print("Mag X: "); Serial.print(ndofMagX);   Serial.print(" uT");
-  Serial.print("  Y: "); Serial.print(ndofMagY);     Serial.print(" uT");
-  Serial.print("  Z: "); Serial.print(ndofMagZ);     Serial.print(" uT");
-  Serial.print("\t");
-  Serial.print("Gyro X: "); Serial.print(ndofGyroX);   Serial.print(" rad/s");
-  Serial.print("  Y: "); Serial.print(ndofGyroY);      Serial.print(" rad/s");
-  Serial.print("  Z: "); Serial.print(ndofGyroZ);      Serial.print(" rad/s");
-
-  Serial.println();
-}
-
-
-
-
-
-
-
-void handle9dof(){
-  lsm.read();
-  sensors_event_t a, m, g, temp;
-  lsm.getEvent(&a, &m, &g, &temp);
-
-  ndofAccelX=a.acceleration.x; // m/s^2
-  ndofAccelY=a.acceleration.y; // m/s^2
-  ndofAccelZ=a.acceleration.z; // m/s^2
-  ndofMagX=m.magnetic.x;   // uT
-  ndofMagY=m.magnetic.y;   // uT
-  ndofMagZ=m.magnetic.z;   // uT
-  ndofGyroX=g.gyro.x;  // rad/s
-  ndofGyroY=g.gyro.y;  // rad/s
-  ndofGyroZ=g.gyro.z;  // rad/s
-}
-
-
-
-void handleGPS(){ 
-  if (gps.location.isValid()){
-    gpsLat=gps.location.lat();
-    gpsLng=gps.location.lng();
-  }else{
-   gpsLat=NULL;
-   gpsLng=NULL;
-  }
-
-  if (gps.date.isValid()){
-    gpsMonth=gps.date.month();
-    gpsDay=gps.date.day();
-    gpsYear=gps.date.year();
-  }else{
-    gpsMonth=NULL;
-    gpsDay=NULL;
-    gpsYear=NULL;
-  }
-
-  if (gps.time.isValid()){
-    gpsHour=gps.time.hour();
-    gpsMinute=gps.time.minute();
-    gpsSecond=gps.time.second();
-  }
-  else{
-    gpsHour=NULL;
-    gpsMinute=NULL;
-    gpsSecond=NULL;
-  }
+void InterruptSparkPlugFire(){
+  float hz;
+  float timeBetweenUpdates;
   
-  if(gps.speed.isValid()){
-    gpsSpeed=gps.speed.mph();
-  }else{
-    gpsSpeed=NULL;
+  long elapsedTimeSparkPlug=millis()-timerSparkPlug;
+  timerSparkPlug=millis(); //reset timerSparkPlug
+  timeBetweenUpdates=elapsedTimeSparkPlug/1000.0;
+
+  //Average last few values using HZ
+  runningAvgSparkPlug[0]=runningAvgSparkPlug[1];
+  runningAvgSparkPlug[1]=runningAvgSparkPlug[2];
+  runningAvgSparkPlug[2]=runningAvgSparkPlug[3];
+  runningAvgSparkPlug[3]=elapsedTimeSparkPlug;
+
+  elapsedTimeSparkPlug=0;
+  for(int i=0;i<4;i++){
+    elapsedTimeSparkPlug+=runningAvgSparkPlug[i];
   }
-  if(gps.course.isValid()){
-    gpsCourse=gps.course.value();
-  }else{
-    gpsCourse=NULL;
-  }
-  //Serial.print(gps.speed.age()); //not sure where/if this is useful yet...
+  elapsedTimeSparkPlug=elapsedTimeSparkPlug/4;
+  
+  hz = 1.0/(((elapsedTimeSparkPlug/1000.0))); 
+
+  engineRPM = hz*60;
+
 }
-*/

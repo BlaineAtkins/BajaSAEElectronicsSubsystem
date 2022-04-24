@@ -21,7 +21,6 @@ private:
 
     float tempAmb = 0;
     int tempCVT = 0;
-    int rpm = 500; // 0-1000
     int fuel = 100; // 0-100
     int runTime = 0;
     int startTime = 0;
@@ -80,6 +79,7 @@ public:
     Adafruit_BNO055 bno = Adafruit_BNO055(55);
 
     float speedMPH = 0;
+    int rpm = 500; // 0-1000
 
     bool WriteToSD();
     int GetSpeedMPH();
