@@ -1,5 +1,3 @@
 {
-    "board": "arduino:avr:uno",
-    "programmer": "arduino:avrisp",
-    "sketch": "TeensyCode\\MainSketch\\MainSketch.ino"
+    "board": "arduino:avr:uno"
 }

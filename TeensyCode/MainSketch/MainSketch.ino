@@ -25,11 +25,19 @@ volatile int runningAvgSparkPlug[4];
 volatile float engineRPM=0;
 
 
+/*
+ * Tries to safeload(), fails at Reader r, checking Reader.
+ * 
+ * 
+ * 
+ * 
+ */
+
+
 void setup() {
   
   // Initizlize Communications
   Serial.begin(115200);
-
   Serial5.begin(9600); //initialize GPS hardware serial
 
   //Hall Effect spedometer
@@ -43,14 +51,29 @@ void setup() {
   //CVT infrared sensor
   pinMode(41,INPUT);
 
+  pinMode(4, INPUT); // Dark/light switch
+  pinMode(5, INPUT); // Verbose mode
+  pinMode(6, INPUT); // Reset fuel level
+
 }
 void loop() {
   Vehicle Baja;
   
   while(1){
     
-    Baja.Display();
-    delay(10);
+    delay(100);
+    if(digitalRead(6) == HIGH)
+      Baja.fuel = 100;
+    if(digitalRead(4) == LOW){
+      Baja.darkMode = true;
+    } else{
+      Baja.darkMode = false;
+    }
+    if(digitalRead(5) == HIGH){ // Verbose mode
+      Baja.DisplayVerbose();
+    } else{
+      Baja.Display();
+    } 
     if(millis()-timerVehicleSpeed>1000){
       vehicleSpeedMPH=0;
     }

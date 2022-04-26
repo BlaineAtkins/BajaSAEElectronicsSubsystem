@@ -25,7 +25,7 @@ bool radioDetected=0;
 // Initialize display (and other things)
 void Vehicle::BeginDisplay(){
   Serial.println("If you get stuck here, the display is disconnected. Please connect display to boot.");
-  SD.begin(254);  
+  SD.begin(10);  
   GD.begin(0);
   //for ambient temperature
   sensors.begin();
@@ -590,25 +590,29 @@ int Vehicle::GetFuelLevel(){
 
 
 
-// TODO: Include all desired data on display pass
 // Refresh display with new data
 void Vehicle::Display(){
   // Formatting
-  int textColor = 0xffffff; // White text
-  textColor = 0; // Black text
+  int textColor;
+  
+  if(darkMode){
+    textColor = 0xffffff; // White text
+    GD.ClearColorRGB(0, 0, 40); // Black background    
+  } else{
+    textColor = 0; // Black text    
+    GD.ClearColorRGB(0xffffff); // white background
+  }
 
-  GD.ClearColorRGB(0, 0, 40); // Set background color
-  GD.ClearColorRGB(0xffffff); // override to white background
   GD.Clear();
   GD.ColorRGB(textColor); // Set text/element color
 
   // Display run time
   int timeMin = (int)(millis()/60000.0);
-  String timeString = (String)timeMin + "min";
-  char timeChar[100];
-  timeString.toCharArray(timeChar, 100);
+  String runtimeString = (String)timeMin + "min";
+  char runtimeChar[100];
+  runtimeString.toCharArray(runtimeChar, 100);
   GD.cmd_text(GD.w-130, 30, 31, OPT_CENTER, "Run Time:");
-  GD.cmd_text(GD.w-130, 70, 31, OPT_CENTER, timeChar);
+  GD.cmd_text(GD.w-130, 70, 31, OPT_CENTER, runtimeChar);
 
   // Display CVT temperature
   int cvtTemp = this->tempCVT;
@@ -625,12 +629,11 @@ void Vehicle::Display(){
   GD.cmd_text(10, 30, 31, OPT_CENTERY, ambChar);
 
   // Display engine RPM
-  int deleteThis = this->rpm;
-  //deleteThis = deleteThis + rand()%25 - rand()%25;
-  String rpmString = (String)deleteThis;
+  int rpmVal = this->rpm;
+  String rpmString = (String)rpmVal;
   char rpmChar[10];
   rpmString.toCharArray(rpmChar, 10);
-  GD.cmd_gauge(170, GD.h/2+50, 200, OPT_NOBACK, 20, 100, deleteThis, 750);
+  GD.cmd_gauge(170, GD.h/2+50, 200, OPT_NOBACK, 20, 100, rpmVal, 750);
   GD.cmd_text(170, GD.h/2+100, 31, OPT_CENTER, rpmChar);
   GD.cmd_text(170, GD.h/2+130, 29, OPT_CENTER, "RPM");
 
@@ -659,12 +662,8 @@ void Vehicle::Display(){
 
   GD.cmd_progress(160, GD.h-40, GD.w-180, 30, OPT_CENTER, this->fuel, 100);
 
-  this->fuel = this->fuel-1;
-  if(this->fuel < 0){ // REMOVE THIS WHEN ACTUAL FUEL PUT IN
-    this->fuel = 100;
-  }
   GD.swap();
-  
+ 
 /* DISPLAY EXAMPLES:
 
   Dial measurement:
@@ -676,4 +675,105 @@ void Vehicle::Display(){
   Progress bar:
   GD.cmd_progress(<xpos>, <ypos>, <width>, <height>, <centering options>, <value>, <range>); 
  */
+}
+
+
+
+// Refresh display with new data
+void Vehicle::DisplayVerbose(){
+  // Formatting
+  int textColor;
+  
+  if(darkMode){
+    textColor = 0xffffff; // White text
+    GD.ClearColorRGB(0, 0, 40); // Black background    
+  } else{
+    textColor = 0; // Black text    
+    GD.ClearColorRGB(0xffffff); // white background
+  }
+
+  GD.Clear();
+  GD.ColorRGB(textColor); // Set text/element color
+
+  // Display CVT temperature
+  int cvtTemp = this->tempCVT;
+  String cvtString = "CVT: " + (String)cvtTemp + "C";
+  char cvtChar[20];
+  cvtString.toCharArray(cvtChar, 20);
+  GD.cmd_text(500, 30, 31, OPT_CENTERY, cvtChar);
+
+  // Display ambient temperature
+  int ambTemp = this->tempAmb;
+  String ambString = "Ambient: " + (String)ambTemp + "C / " + (String)((int)(1.8*ambTemp+32)) + "F";
+  char ambChar[50];
+  ambString.toCharArray(ambChar, 50);
+  GD.cmd_text(10, 30, 31, OPT_CENTERY, ambChar);
+
+  // Display engine RPM
+  int rpmVal = this->rpm;
+  String rpmString = (String)rpmVal + " RPM";
+  char rpmChar[10];
+  rpmString.toCharArray(rpmChar, 10);
+  GD.cmd_text(10, 70, 31, OPT_CENTERY, rpmChar);
+
+  // Display vehicle speed
+  String speedString = (String)this->speedMPH;
+  speedString.remove(speedString.length()-1);
+  speedString += " MPH";
+  char speedChar[20];
+  speedString.toCharArray(speedChar, 20);
+  GD.cmd_text(250, 70, 31, OPT_CENTERY, speedChar);
+
+  //Display fuel level
+  String fuelString =  "F:" + (String)this->fuel + "%";
+  char fuelChar[20];
+  fuelString.toCharArray(fuelChar, 20);
+  GD.cmd_text(7, GD.h-25, 31, OPT_CENTERY, fuelChar);
+
+  //Display date from gps
+  String dateString =  (String)this->gpsMonth + "/" + (String)this->gpsDay + "/" + (String)this->gpsYear;
+  char dateChar[25];
+  dateString.toCharArray(dateChar, 25);
+  GD.cmd_text(10, 110, 31, OPT_CENTERY, dateChar);
+
+  //Display time from gps
+  String timeString =  (String)this->gpsHour + ":" + (String)this->gpsMinute;
+  char timeChar[20];
+  timeString.toCharArray(timeChar, 20);
+  GD.cmd_text(250, 110, 31, OPT_CENTERY, timeChar);
+
+  // Display run time
+  int timeMin = (int)(millis()/60000.0);
+  String runtimeString = (String)timeMin + "min";
+  char runtimeChar[100];
+  runtimeString.toCharArray(runtimeChar, 100);
+  GD.cmd_text(500, 110, 31, OPT_CENTERY, runtimeChar);
+
+  //Display raw accelerometer data
+  String accelString = "X=" + (String)this->rawAccelx + "g Y=" + (String)this->rawAccely + "g Z=" + (String)this->rawAccelz + "g";
+  char accelChar[50];
+  accelString.toCharArray(accelChar, 50);
+  GD.cmd_text(10, 270, 31, OPT_CENTERY, accelChar);
+
+  //Display linear accelerometer data (minus gravity)
+  accelString = "X=" + (String)this->linAccelx + "g Y=" + (String)this->linAccely + "g Z=" + (String)this->linAccelz + "g";
+//  char accelChar[50];
+  accelString.toCharArray(accelChar, 50);
+  GD.cmd_text(10, 310, 31, OPT_CENTERY, accelChar);
+
+  //Display magnetometer data
+  String magString = "X=" + (String)this->magx + "uT Y=" + (String)this->magy + "uT Z=" + (String)this->magz + "uT";
+  char magChar[50];
+  magString.toCharArray(magChar, 50);
+  GD.cmd_text(10, 350, 31, OPT_CENTERY, magChar);
+
+  if(fuel > 49)
+    GD.ColorRGB(0, 255, 0); // Green
+  else if(fuel > 20)
+    GD.ColorRGB(255, 255, 0); // Yellow
+  else
+    GD.ColorRGB(255, 0, 0); // Red
+
+  GD.cmd_progress(160, GD.h-40, GD.w-180, 30, OPT_CENTER, this->fuel, 100);
+  GD.swap();
 }

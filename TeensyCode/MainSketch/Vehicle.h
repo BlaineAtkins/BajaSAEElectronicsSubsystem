@@ -21,7 +21,6 @@ private:
 
     float tempAmb = 0;
     int tempCVT = 0;
-    int fuel = 100; // 0-100
     int runTime = 0;
     int startTime = 0;
     //double gpsPos[2] = {0, 0}; // x, y?
@@ -29,37 +28,37 @@ private:
     double brakePressure = 0;
 
     //for GPS
-    double gpsLat;
-    double gpsLng;
-    double gpsSpeed;
-    int gpsSecond;
-    int gpsMinute;
-    int gpsHour;
-    int gpsDay;
-    int gpsMonth;
-    int gpsYear;
-    double gpsCourse;
+    double gpsLat = 0;
+    double gpsLng = 0;
+    double gpsSpeed = 0;
+    int gpsSecond = 0;
+    int gpsMinute = 0;
+    int gpsHour = 0;
+    int gpsDay = 0;
+    int gpsMonth = 0;
+    int gpsYear = 0;
+    double gpsCourse = 0;
 
     //for 9dof
-    double rawAccelx;
-    double rawAccely;
-    double rawAccelz;
-    double linAccelx;
-    double linAccely;
-    double linAccelz;
-    double gravityx;
-    double gravityy;
-    double gravityz;
-    double orientationx;
-    double orientationy;
-    double orientationz;
-    double magx;
-    double magy;
-    double magz;
-    double gyrox;
-    double gyroy;
-    double gyroz;
-    int8_t boxTemp;
+    double rawAccelx = 0;
+    double rawAccely = 0;
+    double rawAccelz = 0;
+    double linAccelx = 0;
+    double linAccely = 0;
+    double linAccelz = 0;
+    double gravityx = 0;
+    double gravityy = 0;
+    double gravityz = 0;
+    double orientationx = 0;
+    double orientationy = 0;
+    double orientationz = 0;
+    double magx = 0;
+    double magy = 0;
+    double magz = 0;
+    double gyrox = 0;
+    double gyroy = 0;
+    double gyroz = 0;
+    int8_t boxTemp = 0;
 
     unsigned long cycleTimer=0;
     int timePerCycle;
@@ -80,7 +79,11 @@ public:
 
     float speedMPH = 0;
     int rpm = 500; // 0-1000
+    int fuel = 50; // 0-100
+    bool darkMode = true;
+    bool verboseMode = false;
 
+    
     bool WriteToSD();
     int GetSpeedMPH();
     int GetFuelLevel();
@@ -94,5 +97,6 @@ public:
     void WriteToRadio();
 //    void AppendChar(char* char1, char* char2, int l1, int l2);
     void Display();
+    void DisplayVerbose();
 };
 #endif
