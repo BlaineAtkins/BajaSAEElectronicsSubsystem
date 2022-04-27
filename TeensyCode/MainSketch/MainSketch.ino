@@ -52,7 +52,7 @@ void setup() {
   pinMode(41,INPUT);
 
   pinMode(4, INPUT); // Dark/light switch
-  pinMode(5, INPUT); // Verbose mode
+//  pinMode(5, INPUT); // Verbose mode
   pinMode(6, INPUT); // Reset fuel level
 
 }
@@ -61,9 +61,9 @@ void loop() {
   
   while(1){
     
-    delay(100);
+    delay(10);
     if(digitalRead(6) == HIGH)
-      Baja.fuel = 100;
+      Baja.refTime = millis();
     if(digitalRead(4) == LOW){
       Baja.darkMode = true;
     } else{
@@ -77,7 +77,7 @@ void loop() {
     if(millis()-timerVehicleSpeed>1000){
       vehicleSpeedMPH=0;
     }
-    if(millis()-timerSparkPlug>100){ //we expect spark plug fires a maximum of 40 ms apart
+    if(millis()-timerSparkPlug>500){ //we expect spark plug fires a maximum of 40 ms apart, if less frequent than 500ms, rpm=0
       engineRPM=0;
     }
     

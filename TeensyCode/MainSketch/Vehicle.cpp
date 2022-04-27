@@ -585,6 +585,14 @@ int Vehicle::GetRPM(){
 // Returns fuel level between 0 and 100
 // TODO: Get fuel level (0-100%)
 int Vehicle::GetFuelLevel(){
+  // Assume 2.5hrs to empty, 9,000,000ms
+  this->fuel = (9000000+this->refTime-millis()) / 9000000;
+  if(this->fuel > 100){
+     this->fuel = 100;
+  } else if(this->fuel < 0){
+     this->fuel = 0;
+  }
+  
   return this->fuel;
 }
 
@@ -624,8 +632,8 @@ void Vehicle::Display(){
   // Display ambient temperature
   int ambTemp = this->tempAmb;
   String ambString = "Ambient: " + (String)ambTemp + "C / " + (String)((int)(1.8*ambTemp+32)) + "F";
-  char ambChar[20];
-  ambString.toCharArray(ambChar, 20);
+  char ambChar[50];
+  ambString.toCharArray(ambChar, 50);
   GD.cmd_text(10, 30, 31, OPT_CENTERY, ambChar);
 
   // Display engine RPM
@@ -633,7 +641,7 @@ void Vehicle::Display(){
   String rpmString = (String)rpmVal;
   char rpmChar[10];
   rpmString.toCharArray(rpmChar, 10);
-  GD.cmd_gauge(170, GD.h/2+50, 200, OPT_NOBACK, 20, 100, rpmVal, 750);
+  GD.cmd_gauge(170, GD.h/2+50, 200, OPT_NOBACK, 20, 100, rpmVal, 4000);
   GD.cmd_text(170, GD.h/2+100, 31, OPT_CENTER, rpmChar);
   GD.cmd_text(170, GD.h/2+130, 29, OPT_CENTER, "RPM");
 
@@ -766,6 +774,12 @@ void Vehicle::DisplayVerbose(){
   char magChar[50];
   magString.toCharArray(magChar, 50);
   GD.cmd_text(10, 350, 31, OPT_CENTERY, magChar);
+
+  //Display orientation data
+  String orientString = "X=" + (String)this->orientationx + "deg Y=" + (String)this->orientationy + "deg Z=" + (String)this->orientationz + "deg";
+  char orientChar[50];
+  orientString.toCharArray(orientChar, 50);
+  GD.cmd_text(10, 230, 31, OPT_CENTERY, orientChar);
 
   if(fuel > 49)
     GD.ColorRGB(0, 255, 0); // Green

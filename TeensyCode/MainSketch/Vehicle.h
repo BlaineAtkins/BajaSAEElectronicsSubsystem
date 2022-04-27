@@ -22,7 +22,7 @@ private:
     float tempAmb = 0;
     int tempCVT = 0;
     int runTime = 0;
-    int startTime = 0;
+    int fuel = 100; // 0-100
     //double gpsPos[2] = {0, 0}; // x, y?
     //double accelerometer[3] = {0, 0, 0}; // x, y, z
     double brakePressure = 0;
@@ -77,9 +77,9 @@ public:
     //IMU
     Adafruit_BNO055 bno = Adafruit_BNO055(55);
 
+    int refTime = 0;
     float speedMPH = 0;
     int rpm = 500; // 0-1000
-    int fuel = 50; // 0-100
     bool darkMode = true;
     bool verboseMode = false;
 
