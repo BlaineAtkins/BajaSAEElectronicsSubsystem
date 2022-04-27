@@ -86,7 +86,7 @@ void loop() {
     
     Baja.GetTempAmb();
     Baja.GetTempCVT();
-    
+    Baja.GetFuelLevel();
     Baja.GetGPSData(); //Call this as often as possible! See comment on the function in Vehicle.cpp
     //Baja.DisplayGPSOnSerial();
 
