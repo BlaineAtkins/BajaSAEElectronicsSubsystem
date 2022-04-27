@@ -584,16 +584,20 @@ int Vehicle::GetRPM(){
 
 // Returns fuel level between 0 and 100
 // TODO: Get fuel level (0-100%)
-int Vehicle::GetFuelLevel(){
+void Vehicle::GetFuelLevel(){
   // Assume 2.5hrs to empty, 9,000,000ms
-  this->fuel = (9000000+this->refTime-millis()) / 9000000;
+  this->fuel = ceil(100.0*(9000000+this->refTime-millis()) / 9000000.0);
+  Serial.print(this->fuel);
+  Serial.print(" ");
+  Serial.print(this->refTime);
+  Serial.print(" ");
+  Serial.println(millis());
   if(this->fuel > 100){
      this->fuel = 100;
   } else if(this->fuel < 0){
      this->fuel = 0;
   }
   
-  return this->fuel;
 }
 
 

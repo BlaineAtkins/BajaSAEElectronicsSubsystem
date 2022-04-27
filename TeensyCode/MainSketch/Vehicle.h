@@ -86,7 +86,7 @@ public:
     
     bool WriteToSD();
     int GetSpeedMPH();
-    int GetFuelLevel();
+    void GetFuelLevel();
     int GetTempAmb();
     int GetTempCVT();
     int GetRPM();
